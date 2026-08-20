@@ -1,4 +1,4 @@
-// sidepanel.js V22
+// sidepanel.js V23
 (function () {
   'use strict';
   const FORM_FIELDS = {
@@ -28,7 +28,7 @@
   };
 
   function start() {
-    console.log('[TestMateX] V22 (P0 Bug 修复)');
+    console.log('[TestMateX] V23 (Content Script 重试机制)');
     bindEvents();
     setInterval(pollPingCode, 8000);
     setTimeout(pollPingCode, 200);
@@ -702,13 +702,22 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function sendToContentScript(tabId, action, params) {
+  function sendToContentScript(tabId, action, params, retries) {
+    retries = retries || 0;
     return new Promise(function (resolve) {
       try {
         chrome.tabs.sendMessage(tabId, { action: action, opts: params }, function (response) {
           if (chrome.runtime.lastError) {
-            console.error('[TestMateX] sendMessage 错误:', chrome.runtime.lastError.message);
-            resolve({ __error: 'Content Script 未注入: ' + chrome.runtime.lastError.message });
+            var msg = chrome.runtime.lastError.message;
+            if (msg.indexOf('Receiving end does not exist') !== -1 && retries < 3) {
+              console.warn('[TestMateX] sendMessage 重试 (' + (retries + 1) + '/3):', action);
+              setTimeout(function () {
+                sendToContentScript(tabId, action, params, retries + 1).then(resolve);
+              }, 800 * (retries + 1));
+              return;
+            }
+            console.error('[TestMateX] sendMessage 错误:', msg);
+            resolve({ __error: 'Content Script 未注入: ' + msg });
           } else {
             resolve(response || {});
           }
