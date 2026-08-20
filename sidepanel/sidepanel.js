@@ -1,6 +1,17 @@
-// sidepanel.js V23
+// sidepanel.js V23 + ENV Adapter
 (function () {
   'use strict';
+
+  // ─── ENV 读取 (sidepanel 独立 window) ───
+  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+    ENV: 'mock',
+    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
+    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+  };
+  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+  function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
+  console.log('[TestMateX SP] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE'));
+
   const FORM_FIELDS = {
     title: 'edit-title', stage: 'edit-stage',
     featureModule: 'f-featureModule', preconditions: 'f-preconditions',
@@ -25,15 +36,31 @@
     failedExecs: [], currentCases: [],
     selectedCases: new Set(), expandedCases: new Set(),
     aiResults: {}, projects: [], tasks: [],
+    submitSystem: 'pingcode',  // 'pingcode' | 'plm' | 'both'
   };
 
   function start() {
-    console.log('[TestMateX] V23 (Content Script 重试机制)');
+    console.log('[TestMateX] V23 + ENV Adapter, ENV=' + __TESTMATEX_CONFIG.ENV);
     bindEvents();
     setInterval(pollPingCode, 8000);
     setTimeout(pollPingCode, 200);
+    setInterval(pollPlm, 8000);
+    setTimeout(pollPlm, 250);
     setTimeout(detectAndScan, 500);
     setupUrlWatcher();
+    applyEnvBadge();
+  }
+
+  function applyEnvBadge() {
+    // 在 brand-sub 显示当前环境 (让用户一眼看到这是 mock 还是 prod)
+    const sub = document.getElementById('brand-sub');
+    if (sub) {
+      sub.textContent = isMockMode() ? '🧪 MOCK 环境' : 'AiTest 至 PingCode';
+      sub.style.color = isMockMode() ? '#dc2626' : '';
+      sub.style.fontWeight = isMockMode() ? '600' : '';
+    }
+    // 文档 title 也标一下, 方便调试
+    document.title = isMockMode() ? 'TestMateX [MOCK]' : 'TestMateX';
   }
 
   let lastUrl = '';
@@ -53,18 +80,43 @@
   function bindEvents() {
     document.getElementById('btn-reconnect').addEventListener('click', detectAndScan);
     document.getElementById('btn-reauth').addEventListener('click', handleReauth);
+    document.getElementById('btn-plm-reauth').addEventListener('click', pollPlm);
     document.getElementById('project-select').addEventListener('change', onProjectChange);
     document.getElementById('task-select').addEventListener('change', onTaskChange);
     document.getElementById('btn-pick-library').addEventListener('click', pickProject);
     document.getElementById('btn-scan').addEventListener('click', scan);
-    document.getElementById('check-all').addEventListener('change', toggleAll);
+    // 'check-all' checkbox 已删 (改单选模式, 不再需要 toggleAll 绑定)
     document.getElementById('btn-submit-selected').addEventListener('click', function () { gotoEdit(); });
     document.getElementById('btn-ai-batch').addEventListener('click', aiBatch);
     document.getElementById('btn-edit-back-2').addEventListener('click', gotoList);
-    document.getElementById('btn-edit-preview-2').addEventListener('click', gotoPreview);
-    document.getElementById('btn-edit-submit-2').addEventListener('click', function () { submitFromEdit(); });
-    document.getElementById('btn-preview-back-2').addEventListener('click', gotoEdit);
-    document.getElementById('btn-preview-submit-2').addEventListener('click', function () { submitFromEdit(); });
+    // 编辑页 [下一步: 确认提单] → 渲染预览页 + 跳到 page-preview (用户最后确认后再点 [确认提交] 才真正发)
+    document.getElementById('btn-edit-next').addEventListener('click', submitFromEdit);
+    // 预览页按钮: 返回编辑 / 确认提交 (后者弹 modal 让用户最后二次确认)
+    const pvBack = document.getElementById('btn-preview-back');
+    const pvSubmit = document.getElementById('btn-preview-submit');
+    if (pvBack) pvBack.addEventListener('click', gotoEdit);
+    if (pvSubmit) pvSubmit.addEventListener('click', confirmBeforeSubmit);
+    // modal 按钮: 取消/关闭/确认
+    const mcCancel = document.getElementById('btn-modal-cancel');
+    const mcClose = document.getElementById('btn-modal-close');
+    const mcConfirm = document.getElementById('btn-modal-confirm');
+    if (mcCancel) mcCancel.addEventListener('click', hideConfirmModal);
+    if (mcClose) mcClose.addEventListener('click', hideConfirmModal);
+    if (mcConfirm) mcConfirm.addEventListener('click', doActualSubmit);
+    document.getElementById('btn-success-back').addEventListener('click', gotoSuccessBack);
+
+    // 系统选择 radio 监听
+    const sysGroup = document.getElementById('submit-system-group');
+    if (sysGroup) {
+      sysGroup.querySelectorAll('input[type="radio"]').forEach(function (rb) {
+        rb.addEventListener('change', function () {
+          if (rb.checked) {
+            state.submitSystem = rb.value;
+            console.log('[TestMateX] 切换提单系统:', state.submitSystem);
+          }
+        });
+      });
+    }
     document.getElementById('edit-template').addEventListener('change', onTemplateChange);
     document.getElementById('edit-stage').addEventListener('change', onStageChange);
   }
@@ -77,7 +129,23 @@
       if (res && res.success && res.status && res.status.authenticated) {
         const name = res.status.user && (res.status.user.display_name || '已连接');
         if (dot) dot.className = 'status-dot ok';
-        if (val) val.textContent = name;
+        if (val) val.textContent = (res.status.mock ? '🧪 ' : '') + name;
+      } else {
+        if (dot) dot.className = 'status-dot error';
+        if (val) val.textContent = '未连接';
+      }
+    } catch (e) {}
+  }
+
+  async function pollPlm() {
+    try {
+      const res = await chrome.runtime.sendMessage({ action: 'CHECK_PLM_STATUS' });
+      const dot = document.getElementById('plm-dot');
+      const val = document.getElementById('plm-status');
+      if (res && res.success && res.status && res.status.authenticated) {
+        const name = res.status.user && (res.status.user.display_name || '已连接');
+        if (dot) dot.className = 'status-dot ok plm';
+        if (val) val.textContent = (res.status.mock ? '🧪 ' : '') + name;
       } else {
         if (dot) dot.className = 'status-dot error';
         if (val) val.textContent = '未连接';
@@ -87,7 +155,11 @@
 
   async function detectAndScan() {
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       const dot = document.getElementById('aitest-dot');
       const val = document.getElementById('aitest-status');
       if (!tabs || !tabs.length) {
@@ -99,6 +171,7 @@
       const tab = tabs[0];
       if (dot) dot.className = 'status-dot ok';
       const path = new URL(tab.url).pathname;
+      const labelSuffix = isMockMode() ? ' (Mock)' : '';
       const params = new URLSearchParams(tab.url.split('?')[1] || '');
       let pageLabel = '页面';
       if (path.indexOf('library') !== -1) pageLabel = '项目列表';
@@ -160,7 +233,11 @@
 
   async function scanAllProjects() {
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) {
         console.warn('[TestMateX] 未找到 AiTest tab');
         return;
@@ -185,7 +262,11 @@
   async function scanTasksFromPageDOM() {
     if (!state.currentProject) return;
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) return;
       const tabUrl = new URL(tabs[0].url);
       if (tabUrl.pathname.indexOf('library') !== -1) {
@@ -210,7 +291,11 @@
   async function scanTasksViaAPI() {
     if (!state.currentProject) return;
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) return;
       const response = await sendToContentScript(tabs[0].id, 'SCAN_TASKS_LIST', {
         execProjectType: state.currentProject.execProjectType || 0,
@@ -296,7 +381,11 @@
     state.tasks = [];
 
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (tabs && tabs.length) {
         const url = tabs[0].url;
         const baseUrl = url.split('?')[0];
@@ -318,7 +407,11 @@
       projectName: state.currentProject ? state.currentProject.projectName : ''
     } : { taskId: parseInt(taskId, 10), taskName: '任务 #' + taskId };
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (tabs && tabs.length) {
         const url = tabs[0].url;
         const baseUrl = url.split('?')[0].replace('automationManage-task', 'automationManage-taskDetail');
@@ -340,7 +433,11 @@
     const btn = document.getElementById('btn-scan');
     if (btn) { btn.disabled = true; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>扫描中...'; }
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) {
         showToast('请先打开 AiTest 任务详情页', 'error');
         return;
@@ -382,7 +479,11 @@
 
   async function loadCasesForExec(execWid) {
     try {
-      const tabs = await chrome.tabs.query({ url: 'http://10.20.65.23:3000/Dml/AiTest/*' });
+      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
+      const aitestUrlPattern = isMockMode()
+        ? 'http://localhost:8000/*'
+        : 'http://10.20.65.23:3000/Dml/AiTest/*';
+      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) return;
       const response = await sendToContentScript(tabs[0].id, 'GET_CASES_FOR_EXEC', { execWid: execWid });
       if (!response || !response.success) {
@@ -390,7 +491,8 @@
         return;
       }
       state.currentCases = response.data.cases || [];
-      state.selectedCases = new Set(state.currentCases.map(function (c) { return c.wid; }));
+      // 单选模式: 默认只选第一个失败用例
+      state.selectedCases = new Set([state.currentCases[0].wid]);
       renderCases();
     } catch (e) {}
   }
@@ -458,23 +560,32 @@
       cb.addEventListener('change', function () {
         const card = cb.closest('.case-card');
         const wid = parseInt(card.dataset.wid, 10);
-        if (cb.checked) state.selectedCases.add(wid);
-        else state.selectedCases.delete(wid);
-        card.classList.toggle('selected', cb.checked);
+        if (cb.checked) {
+          // 单选模式: 勾选新用例前, 先清掉所有其他选中
+          state.selectedCases.clear();
+          state.selectedCases.add(wid);
+          list.querySelectorAll('.case-card').forEach(function (otherCard) {
+            const otherWid = parseInt(otherCard.dataset.wid, 10);
+            if (otherWid !== wid) {
+              otherCard.classList.remove('selected');
+              const otherCb = otherCard.querySelector('input[data-action="select"]');
+              if (otherCb) otherCb.checked = false;
+            }
+          });
+          card.classList.add('selected');
+        } else {
+          state.selectedCases.delete(wid);
+          card.classList.remove('selected');
+        }
         document.getElementById('submit-count').textContent = state.selectedCases.size;
         document.getElementById('btn-submit-selected').disabled = state.selectedCases.size === 0;
       });
     });
   }
 
-  function toggleAll() {
-    const checked = document.getElementById('check-all').checked;
-    state.currentCases.forEach(function (c) {
-      if (checked) state.selectedCases.add(c.wid);
-      else state.selectedCases.delete(c.wid);
-    });
-    renderCases();
-  }
+  // toggleAll 已废弃: 改单选模式, 顶部"全选" checkbox 也已删除
+  // 函数定义保留仅为兼容旧引用, 实际不触发
+  function toggleAll() { /* no-op */ }
 
   function showEmpty(msg) {
     const list = document.getElementById('cases-list');
@@ -482,50 +593,129 @@
     document.getElementById('list-summary').textContent = '共 0 失败用例';
   }
 
+  // AI 分析功能开发中, 暂时只提示用户
   function aiBatch() {
-    if (state.currentCases.length === 0) {
-      showToast('请先扫描用例', 'error');
-      return;
+    showToast('AI 分析功能开发中, 敬请期待', 'info');
+  }
+
+  // 统一页面切换: 先清掉所有 .page 的 active, 再激活目标
+  function switchPage(targetId) {
+    const ids = ['page-list', 'page-edit', 'page-preview', 'page-success'];
+    for (let i = 0; i < ids.length; i++) {
+      const el = document.getElementById(ids[i]);
+      if (el) el.classList.remove('active');
     }
-    const count = state.currentCases.length;
-    showToast('AI 分析 ' + count + ' 个用例...', 'info');
-    state.currentCases.forEach(function (c, idx) {
-      setTimeout(function () {
-        var nl = String.fromCharCode(10);
-        state.aiResults[c.wid] = '\ud83d\udd0d 根因分析:' + nl +
-          '1. [85%] ' + (c.failanany || '主要错误模式') + nl +
-          '2. [60%] 备选根因' + nl + nl +
-          '\ud83d\udca1 建议: 检查关键日志, 验证参数, 复现验证';
-      }, idx * 500);
-    });
-    setTimeout(function () {
-      showToast('AI 分析完成 (' + count + ' 个用例)', 'success');
-      renderCases();
-    }, count * 500 + 500);
+    const target = document.getElementById(targetId);
+    if (target) target.classList.add('active');
   }
 
   function gotoList() {
-    document.getElementById('page-list').classList.add('active');
-    document.getElementById('page-edit').classList.remove('active');
-    document.getElementById('page-preview').classList.remove('active');
+    switchPage('page-list');
   }
 
   function gotoEdit() {
-    if (state.selectedCases.size === 0) {
-      showToast('请先选择用例', 'error');
-      return;
+    console.log('[TestMateX] gotoEdit 被调, selectedCases.size=', state.selectedCases.size, 'currentCases.length=', state.currentCases.length);
+    try {
+      if (state.selectedCases.size === 0) {
+        console.warn('[TestMateX] gotoEdit: 未选用例');
+        showToast('请先选择用例', 'error');
+        return;
+      }
+      console.log('[TestMateX] gotoEdit: 调 prefillForm');
+      prefillForm();
+      console.log('[TestMateX] gotoEdit: prefillForm 完成, 切页面');
+      const pageList = document.getElementById('page-list');
+      const pageEdit = document.getElementById('page-edit');
+      console.log('[TestMateX] gotoEdit: 元素存在?', !!pageList, !!pageEdit);
+      switchPage('page-edit');
+      console.log('[TestMateX] gotoEdit: 完成');
+    } catch (err) {
+      console.error('[TestMateX] gotoEdit 异常:', err);
+      showToast('跳页失败: ' + err.message, 'error');
     }
-    prefillForm();
-    document.getElementById('page-list').classList.remove('active');
-    document.getElementById('page-edit').classList.add('active');
-    document.getElementById('page-preview').classList.remove('active');
   }
 
-  function gotoPreview() {
-    renderPreview();
-    document.getElementById('page-list').classList.remove('active');
-    document.getElementById('page-edit').classList.remove('active');
-    document.getElementById('page-preview').classList.add('active');
+
+  function gotoSuccess(results) {
+    // 兼容单结果 (旧调用) 和数组 (新调用: pingcode/plm/both)
+    const list = Array.isArray(results) ? results : [results];
+    try {
+      const idEl = document.getElementById('success-identifier');
+      const link = document.getElementById('success-link');
+      const meta = document.getElementById('success-meta');
+
+      // 找 success-content 容器, 注入多结果列表 (如果有 >1 条结果)
+      const successContent = document.querySelector('#page-success .success-content');
+      // 移除旧 results 列表
+      const oldResults = document.getElementById('success-results');
+      if (oldResults) oldResults.remove();
+
+      if (list.length === 1) {
+        // 单结果: 沿用原有大号展示, link 文案跟 system 字段适配
+        const r = list[0];
+        const sysLabel = (r.system || 'pingcode').toUpperCase();
+        if (idEl) {
+          idEl.textContent = r.wholeIdentifier || ('BUG-' + r.bugId);
+          idEl.style.display = '';
+        }
+        if (link) {
+          link.href = r.bugUrl || '#';
+          link.style.display = r.bugUrl ? 'inline-flex' : 'none';
+          // 动态改 link 文本: "在 PingCode 中打开 ↗" / "在 PLM 中打开 ↗"
+          const linkText = link.querySelector('span');
+          if (linkText) linkText.textContent = '在 ' + sysLabel + ' 中打开';
+        }
+        // success-title 也按系统变 (可选, 但更清晰)
+        const titleEl = document.querySelector('#page-success .success-title');
+        if (titleEl) titleEl.textContent = '提单成功 (' + sysLabel + ')';
+      } else {
+        // 多结果: 隐藏大号, 用列表展示
+        if (idEl) idEl.style.display = 'none';
+        if (link) link.style.display = 'none';
+        if (successContent) {
+          const resultsDiv = document.createElement('div');
+          resultsDiv.id = 'success-results';
+          resultsDiv.className = 'success-results';
+          resultsDiv.innerHTML = list.map(function (r) {
+            const failed = r.failed;
+            return '<div class="success-result-card' + (failed ? ' failed' : '') + '">' +
+              '<div class="success-result-system">' + (r.system || '?').toUpperCase() + (failed ? ' · 失败' : ' · 成功') + '</div>' +
+              (failed
+                ? '<div class="success-result-id">' + escapeHtml(r.error || '提交失败') + '</div>'
+                : '<div class="success-result-id">' + escapeHtml(r.wholeIdentifier || ('BUG-' + r.bugId)) + '</div>' +
+                  (r.bugUrl ? '<a class="success-result-link" href="' + escapeHtml(r.bugUrl) + '" target="_blank">在 ' + (r.system || '').toUpperCase() + ' 中打开 ↗</a>' : '')
+              ) +
+            '</div>';
+          }).join('');
+          // 插在 id-card 之后, link 之前
+          const anchor = document.getElementById('success-link');
+          if (anchor) anchor.parentNode.insertBefore(resultsDiv, anchor);
+          else successContent.appendChild(resultsDiv);
+        }
+      }
+
+      if (meta) {
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        meta.innerHTML = '提交时间: ' + now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' +
+          pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+      }
+
+      // 切换页面
+      switchPage('page-success');
+    } catch (err) {
+      console.error('[TestMateX] gotoSuccess 异常:', err);
+    }
+  }
+
+  function gotoSuccessBack() {
+    // 再提一单: 清掉当前选中, 回到 page-list (让用户重选)
+    state.selectedCases = new Set();
+    document.getElementById('page-success').classList.remove('active');
+    document.getElementById('page-list').classList.add('active');
+    renderCases();
+    // 可选: 自动重新扫描失败用例 (mock 模式下数据不变, prod 模式拉新的)
+    detectAndScan();
   }
 
   function prefillForm() {
@@ -564,10 +754,10 @@
     renderEditAiSummary(cases);
 
     const count = cases.length;
-    document.getElementById('edit-count').textContent = count;
-    document.getElementById('edit-count-2').textContent = count;
-    document.getElementById('preview-count').textContent = count;
-    document.getElementById('preview-count-2').textContent = count;
+    // 防御写法: 任一元素缺失不影响其他, 单点失败不阻塞
+    const setText = function (id, value) { const el = document.getElementById(id); if (el) el.textContent = value; };
+    setText('edit-count', count);
+    setText('edit-count-2', count);
   }
 
   function buildAiTestLogUrl(taskId) {
@@ -610,11 +800,44 @@
     box.innerHTML = items || '<p class="text-muted">无 AI 摘要</p>';
   }
 
+  function submitFromEdit() {
+    // 校验 → 渲染预览页 → 跳到 page-preview (用户最后确认后再点 [确认提交] 才真正发)
+    const cases = state.currentCases.filter(function (c) { return state.selectedCases.has(c.wid); });
+    if (cases.length === 0) {
+      showToast('请先选择用例', 'error');
+      return;
+    }
+    const data = getFormData();
+    if (!data.caseId) {
+      showToast('用例编号不能为空', 'error');
+      return;
+    }
+    renderPreview();
+    gotoPreview();
+  }
+
+  function gotoPreview() {
+    switchPage('page-preview');
+  }
+
+  // 渲染预览页: 提单系统 pill + 标题 + 阶段 + 11 个 sections + AI 摘要
   function renderPreview() {
     const data = getFormData();
     const cases = state.currentCases.filter(function (c) { return state.selectedCases.has(c.wid); });
-    document.getElementById('pv-title').textContent = data.title || '-';
-    document.getElementById('pv-stage').textContent = data.stage || '-';
+
+    // 头部: 系统 + 标题 + 阶段 + 用例数
+    const sysLabel = { 'pingcode': 'PingCode', 'plm': 'PLM', 'both': 'PingCode + PLM' }[state.submitSystem] || 'PingCode';
+    const sysPill = document.getElementById('pv-system-pill');
+    if (sysPill) {
+      sysPill.textContent = sysLabel;
+      sysPill.className = 'preview-system-pill' + (state.submitSystem === 'both' ? ' multi' : '');
+    }
+    const setText = function (id, v) { const el = document.getElementById(id); if (el) el.textContent = v || '-'; };
+    setText('pv-title', data.title);
+    setText('pv-stage', data.stage);
+    setText('pv-case-count', cases.length);
+
+    // 11 个 sections 渲染
     const body = document.getElementById('preview-body');
     let html = '';
     const sections = [
@@ -631,8 +854,8 @@
       { title: '11. 其他补充信息', fields: [['', data.otherInfo]] },
     ];
     sections.forEach(function (sec) {
-      const rows = sec.fields.filter(function (kv) { return kv[1] && kv[1].trim(); }).map(function (kv) {
-        return '<div class="preview-row"><span class="key">' + kv[0] + ':</span><span class="val">' + escapeHtml(kv[1]).replace(/ /g, '<br>') + '</span></div>';
+      const rows = sec.fields.filter(function (kv) { return kv[1] && String(kv[1]).trim(); }).map(function (kv) {
+        return '<div class="preview-row"><span class="key">' + kv[0] + ':</span><span class="val">' + escapeHtml(kv[1]).replace(/\n/g, '<br>') + '</span></div>';
       }).join('');
       if (rows) {
         html += '<div class="preview-section"><div class="preview-section-title">' + sec.title + '</div>' + rows + '</div>';
@@ -641,34 +864,85 @@
     if (cases.length > 0) {
       const aiItems = cases.map(function (c) {
         const ai = state.aiResults[c.wid];
-        return '<div class="preview-row"><span class="key">' + escapeHtml(c.testcase_number) + ':</span><span class="val">' + escapeHtml(ai || c.failanany || '') + '</span></div>';
+        return '<div class="preview-row"><span class="key">' + escapeHtml(c.testcase_number) + ':</span><span class="val">' + escapeHtml(ai || c.failanany || '无') + '</span></div>';
       }).join('');
       html += '<div class="preview-section"><div class="preview-section-title">AI 摘要</div>' + aiItems + '</div>';
     }
-    body.innerHTML = html || '<p class="preview-empty">无内容</p>';
+    if (body) body.innerHTML = html || '<p class="preview-empty">无内容</p>';
   }
 
-  async function submitFromEdit() {
-    const cases = state.currentCases.filter(function (c) { return state.selectedCases.has(c.wid); });
-    if (cases.length === 0) {
-      showToast('请先选择用例', 'error');
-      return;
-    }
+  // 预览页 [确认提交] → 弹 modal 让用户最后二次确认 (系统 pill + 关键字段 + 警告)
+  function confirmBeforeSubmit() {
     const data = getFormData();
     if (!data.caseId) {
       showToast('用例编号不能为空', 'error');
       return;
     }
+    showConfirmModal(data);
+  }
+
+  function showConfirmModal(data) {
+    // 填充 modal 关键信息
+    const sysLabel = { 'pingcode': 'PingCode', 'plm': 'PLM', 'both': 'PingCode + PLM' }[state.submitSystem] || 'PingCode';
+    const sysPill = document.getElementById('modal-system-pill');
+    if (sysPill) {
+      sysPill.textContent = sysLabel;
+      sysPill.className = 'modal-system-pill' + (state.submitSystem === 'both' ? ' multi' : '');
+    }
+    const setText = function (id, v) { const el = document.getElementById(id); if (el) el.textContent = v || '-'; };
+    setText('modal-title', data.title);
+    setText('modal-caseId', data.caseId);
+    setText('modal-failure', data.failurePhenomenon);
+    setText('modal-hostIp', data.hostIp);
+    setText('modal-dutSn', data.dutSn);
+
+    // 显示 modal
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function hideConfirmModal() {
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // 真正提交 (modal 二次确认后调用)
+  async function doActualSubmit() {
+    hideConfirmModal();
+    const data = getFormData();
     showToast('提交中...', 'info');
     try {
-      const res = await chrome.runtime.sendMessage({ action: 'SUBMIT_TO_PINGCODE', payload: data });
-      if (res && res.success) {
-        const url = res.bugUrl;
-        showToast('成功! <a href="' + url + '" target="_blank" style="color:#16a34a;font-weight:600;">' + res.wholeIdentifier + '</a>', 'success');
-        setTimeout(gotoList, 1500);
-      } else {
-        throw new Error((res && res.error) || '提交失败');
+      // 根据 state.submitSystem 路由 (pingcode | plm | both)
+      const system = state.submitSystem || 'pingcode';
+      const results = [];
+
+      if (system === 'pingcode' || system === 'both') {
+        const res = await chrome.runtime.sendMessage({ action: 'SUBMIT_TO_PINGCODE', payload: data });
+        if (res && res.success) {
+          results.push(Object.assign({ system: 'pingcode' }, res));
+        } else {
+          throw new Error('PingCode: ' + ((res && res.error) || '失败'));
+        }
       }
+      if (system === 'plm' || system === 'both') {
+        const res = await chrome.runtime.sendMessage({ action: 'SUBMIT_TO_PLM', payload: data });
+        if (res && res.success) {
+          results.push(Object.assign({ system: 'plm' }, res));
+        } else {
+          // both 模式下, PLM 失败不阻断 PingCode 成功 (但要展示错误)
+          if (system === 'plm') throw new Error('PLM: ' + ((res && res.error) || '失败'));
+          results.push({ system: 'plm', failed: true, error: (res && res.error) || 'PLM 提交失败' });
+        }
+      }
+
+      if (results.length === 0) {
+        throw new Error('未选择系统 / 无提交结果');
+      }
+
+      // 单系统: 显示简略 toast; 多系统: 列出
+      const sysLabel = results.map(function (r) { return r.system.toUpperCase(); }).join(' + ');
+      showToast('提单成功 (' + sysLabel + ')', 'success');
+      setTimeout(function () { gotoSuccess(results); }, 500);
     } catch (e) {
       showToast('提交失败: ' + e.message, 'error');
     }
@@ -686,15 +960,34 @@
     } catch (e) {}
   }
 
+  // 单例 toast: 新 toast 出现前先移除旧的, 避免连续调用 (如 '重新鉴权...' → '已连接') 出现重叠
+  let activeToast = null;
+  let activeToastTimer = null;
   function showToast(msg, type) {
+    // 1. 清掉前一个 toast (立即移除, 不等 fade-out)
+    if (activeToast && activeToast.parentNode) {
+      activeToast.parentNode.removeChild(activeToast);
+      activeToast = null;
+    }
+    if (activeToastTimer) { clearTimeout(activeToastTimer); activeToastTimer = null; }
+
+    // 2. 创建新 toast
     const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:6px;font-size:12px;z-index:9999;max-width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:center;z-index:99999;';
+    // 位置从 top:60px (压在 header 状态行) 改成 top:140px (header 下方, 不遮挡状态信息)
+    toast.style.cssText = 'position:fixed;top:140px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:6px;font-size:12px;z-index:99999;max-width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:center;transition:opacity 0.15s;';
     if (type === 'success') { toast.style.background = '#f0fdf4'; toast.style.color = '#166534'; toast.style.border = '1px solid #22c55e'; }
     else if (type === 'error') { toast.style.background = '#fef2f2'; toast.style.color = '#991b1b'; toast.style.border = '1px solid #ef4444'; }
     else { toast.style.background = '#eff6ff'; toast.style.color = '#1e40af'; toast.style.border = '1px solid #3b82f6'; }
     toast.innerHTML = msg;
     document.body.appendChild(toast);
-    setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, type === 'error' ? 5000 : 3000);
+    activeToast = toast;
+
+    // 3. 到时移除 (error 显示更久)
+    activeToastTimer = setTimeout(function () {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+      if (activeToast === toast) activeToast = null;
+      activeToastTimer = null;
+    }, type === 'error' ? 5000 : 3000);
   }
 
   function escapeHtml(str) {
@@ -702,6 +995,9 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // 自愈式 sendMessage: 失败时自动 force-inject content script, 然后重试
+  // 解决: manifest 改动后没 reload / 页面比扩展先加载 / 多个 content_scripts 互相干扰
+  const _injectAttempts = {};  // tabId → attempts, 防止无限循环
   function sendToContentScript(tabId, action, params, retries) {
     retries = retries || 0;
     return new Promise(function (resolve) {
@@ -709,25 +1005,75 @@
         chrome.tabs.sendMessage(tabId, { action: action, opts: params }, function (response) {
           if (chrome.runtime.lastError) {
             var msg = chrome.runtime.lastError.message;
-            if (msg.indexOf('Receiving end does not exist') !== -1 && retries < 3) {
-              console.warn('[TestMateX] sendMessage 重试 (' + (retries + 1) + '/3):', action);
-              setTimeout(function () {
-                sendToContentScript(tabId, action, params, retries + 1).then(resolve);
-              }, 800 * (retries + 1));
+            // 'Receiving end does not exist' = content script 没在监听, 尝试强制注入
+            if (msg.indexOf('Receiving end does not exist') !== -1) {
+              if (!_injectAttempts[tabId]) _injectAttempts[tabId] = 0;
+              _injectAttempts[tabId]++;
+
+              // 第一次失败 + 注入配额内 → 强制注入 config + extractor, 然后重试 sendMessage
+              if (_injectAttempts[tabId] <= 1) {
+                console.warn('[TestMateX] content script 未注入, 强制注入并重试:', action, 'tabId=' + tabId);
+                // 显式 ISOLATED world, 确保与 manifest content_scripts 同一个隔离世界 (listener 才能被 sendMessage 触发)
+                chrome.scripting.executeScript({
+                  target: { tabId: tabId },
+                  files: ['js/config.js', 'content/ai-test-extractor.js'],
+                  world: 'ISOLATED'
+                }, function (execResults) {
+                  if (chrome.runtime.lastError) {
+                    console.error('[TestMateX] force-inject 失败:', chrome.runtime.lastError.message, '— 不再 retry, 直接报错');
+                    resolve({ __error: 'force-inject 失败: ' + chrome.runtime.lastError.message });
+                    return;
+                  }
+                  console.log('[TestMateX] force-inject 成功, execResults=', execResults, '— 等 800ms 让 listener 注册');
+                  // 等长一点 (800ms) 让 IIFE + onMessage 注册完成
+                  setTimeout(function () {
+                    chrome.tabs.sendMessage(tabId, { action: action, opts: params }, function (retryResp) {
+                      if (chrome.runtime.lastError) {
+                        console.error('[TestMateX] force-inject 后仍失败:', chrome.runtime.lastError.message);
+                        resolve({ __error: 'Content Script 注入后仍无响应: ' + chrome.runtime.lastError.message });
+                      } else {
+                        console.log('[TestMateX] force-inject 后 sendMessage 成功');
+                        resolve(retryResp || {});
+                      }
+                    });
+                  }, 800);
+                });
+                return;
+              }
+
+              // 注入后仍失败, 走原 retry 逻辑 (但只 2 次, 避免无限等)
+              if (retries < 2) {
+                console.warn('[TestMateX] sendMessage 重试 (' + (retries + 1) + '/2):', action);
+                setTimeout(function () {
+                  sendToContentScript(tabId, action, params, retries + 1).then(resolve);
+                }, 800 * (retries + 1));
+                return;
+              }
+
+              console.error('[TestMateX] sendMessage 最终失败:', msg);
+              resolve({ __error: 'Content Script 未注入: ' + msg });
               return;
             }
+            // 其他错误 (页面关闭 / 权限等)
             console.error('[TestMateX] sendMessage 错误:', msg);
-            resolve({ __error: 'Content Script 未注入: ' + msg });
+            resolve({ __error: 'sendMessage 错误: ' + msg });
           } else {
+            // 成功: 重置注入计数 (让后续 tab 操作也能 force-inject)
+            delete _injectAttempts[tabId];
             resolve(response || {});
           }
         });
-      } catch (e) { 
+      } catch (e) {
         console.error('[TestMateX] sendMessage 异常:', e);
-        resolve({ __error: 'sendMessage 失败: ' + e.message }); 
+        resolve({ __error: 'sendMessage 异常: ' + e.message });
       }
     });
   }
+
+  // ESC 关闭 modal
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hideConfirmModal();
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
