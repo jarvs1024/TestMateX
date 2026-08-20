@@ -1,0 +1,6 @@
+[     213ms] [LOG] [vite] connecting... @ http://10.20.65.23:3000/@vite/client:183
+[     717ms] [LOG] [vite] connected. @ http://10.20.65.23:3000/@vite/client:211
+[    4989ms] [WARNING] Feature flag __VUE_PROD_HYDRATION_MISMATCH_DETAILS__ is not explicitly defined. You are running the esm-bundler build of Vue, which expects these compile-time feature flags to be globally injected via the bundler config in order to get better tree-shaking in the production bundle.
+
+For more details, see https://link.vuejs.org/feature-flags. @ http://10.20.65.23:3000/node_modules/.vite/deps/chunk-RFSKQV6Q.js?v=914d2da0:6514
+[    5045ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://10.20.65.23:3000/Dml/AiTest/login:0

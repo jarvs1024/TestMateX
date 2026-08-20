@@ -1,0 +1,620 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - menu [ref=f1e7]:
+      - menuitem "home 首页" [ref=f1e8] [cursor=pointer]:
+        - img "home" [ref=f1e9]
+        - generic [ref=f1e12]: 首页
+      - menuitem "slack 需求管理" [ref=f1e13] [cursor=pointer]:
+        - img "slack" [ref=f1e14]
+        - generic [ref=f1e17]: 需求管理
+      - menuitem "code-sandbox 项目管理" [ref=f1e18] [cursor=pointer]:
+        - img "code-sandbox" [ref=f1e19]
+        - generic [ref=f1e22]: 项目管理
+      - menuitem "experiment 测试管理" [ref=f1e23] [cursor=pointer]:
+        - img "experiment" [ref=f1e24]
+        - generic [ref=f1e27]: 测试管理
+      - menuitem "bug 问题单管理" [ref=f1e28] [cursor=pointer]:
+        - img "bug" [ref=f1e29]
+        - generic [ref=f1e33]: 问题单管理
+      - menuitem "trophy 积分统计" [ref=f1e34] [cursor=pointer]:
+        - img "trophy" [ref=f1e35]
+        - generic [ref=f1e38]: 积分统计
+      - generic [ref=f1e39] [cursor=pointer]:
+        - img "history" [ref=f1e40]
+        - generic [ref=f1e43]: 自动化管理
+      - list [ref=f1e44]:
+        - menuitem "执行项目" [ref=f1e45] [cursor=pointer]
+        - menuitem "日志搜集系统" [ref=f1e47] [cursor=pointer]
+      - menuitem "history 兼容性配置管理" [ref=f1e49] [cursor=pointer]:
+        - img "history" [ref=f1e50]
+        - generic [ref=f1e53]: 兼容性配置管理
+      - menuitem "calendar 会议管理" [ref=f1e54] [cursor=pointer]:
+        - img "calendar" [ref=f1e55]
+        - generic [ref=f1e58]: 会议管理
+      - generic [ref=f1e59] [cursor=pointer]:
+        - img "appstore" [ref=f1e60]
+        - generic [ref=f1e63]: SSD环境管理
+      - generic [ref=f1e64] [cursor=pointer]:
+        - img "appstore" [ref=f1e65]
+        - generic [ref=f1e68]: CXL环境管理
+      - generic [ref=f1e69] [cursor=pointer]:
+        - img "line-chart" [ref=f1e70]
+        - generic [ref=f1e73]: 竞品分析
+      - generic [ref=f1e74] [cursor=pointer]:
+        - img "team" [ref=f1e75]
+        - generic [ref=f1e78]: 组织管理
+    - img "left" [ref=f1e80] [cursor=pointer]
+  - generic [ref=f1e83]:
+    - generic [ref=f1e85]:
+      - generic [ref=f1e86] [cursor=pointer]: 克江
+      - img "logo" [ref=f1e89]
+    - main [ref=f1e90]:
+      - generic [ref=f1e91]:
+        - generic [ref=f1e93]:
+          - generic [ref=f1e94]:
+            - generic [ref=f1e95]: 执行项目
+            - text: /
+          - generic [ref=f1e96]: "3361"
+        - generic [ref=f1e98]:
+          - generic [ref=f1e99]:
+            - button "plus 新建任务" [ref=f1e100] [cursor=pointer]:
+              - img "plus" [ref=f1e101]
+              - generic [ref=f1e105]: 新建任务
+            - generic [ref=f1e107]:
+              - textbox "搜索任务" [ref=f1e108]
+              - button [ref=f1e110] [cursor=pointer]:
+                - img "search" [ref=f1e111]
+          - menu [ref=f1e115]:
+            - menuitem "全部工程" [ref=f1e116] [cursor=pointer]
+            - menuitem "我的工程" [ref=f1e118] [cursor=pointer]
+        - generic [ref=f1e123]:
+          - generic [ref=f1e125]:
+            - table [ref=f1e127]:
+              - rowgroup [ref=f1e141]:
+                - row [ref=f1e142]:
+                  - columnheader [ref=f1e143]
+                  - columnheader "任务名称" [ref=f1e144]
+                  - columnheader "关联计划 filter" [ref=f1e145]:
+                    - generic [ref=f1e146]:
+                      - generic [ref=f1e147]: 关联计划
+                      - button [ref=f1e148] [cursor=pointer]:
+                        - img "filter" [ref=f1e149]
+                  - columnheader "关联环境" [ref=f1e152]
+                  - columnheader "执行失败策略" [ref=f1e153]
+                  - columnheader "创建人 filter" [ref=f1e154]:
+                    - generic [ref=f1e155]:
+                      - generic [ref=f1e156]: 创建人
+                      - button [ref=f1e157] [cursor=pointer]:
+                        - img "filter" [ref=f1e158]
+                  - columnheader "创建时间" [ref=f1e161]
+                  - columnheader "更新人" [ref=f1e162]
+                  - columnheader "定时任务? filter" [ref=f1e163]:
+                    - generic [ref=f1e164]:
+                      - generic [ref=f1e165]: 定时任务?
+                      - button [ref=f1e166] [cursor=pointer]:
+                        - img "filter" [ref=f1e167]
+                  - columnheader "备注" [ref=f1e170]
+                  - columnheader "操作" [ref=f1e171]
+                  - columnheader [ref=f1e172]
+            - table [ref=f1e174]:
+              - rowgroup [ref=f1e187]:
+                - row [ref=f1e188]:
+                  - cell [ref=f1e189]:
+                    - button "展开行" [ref=f1e190] [cursor=pointer]
+                  - cell "3100debug" [ref=f1e191]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3100debug" [ref=f1e193]
+                  - cell "查看" [ref=f1e195]
+                  - cell "不锁设备" [ref=f1e196]
+                  - cell "克江 贾克江" [ref=f1e197]:
+                    - generic [ref=f1e198]:
+                      - generic [ref=f1e199]: 克江
+                      - generic [ref=f1e201]: 贾克江
+                  - cell "2026-08-10" [ref=f1e202]
+                  - cell "克江 贾克江" [ref=f1e203]:
+                    - generic [ref=f1e204]:
+                      - generic [ref=f1e205]: 克江
+                      - generic [ref=f1e207]: 贾克江
+                  - cell "未设置" [ref=f1e208]
+                  - cell [ref=f1e209]
+                  - cell [ref=f1e210]:
+                    - generic [ref=f1e211]:
+                      - img "caret-right" [ref=f1e212] [cursor=pointer]
+                      - img "retweet" [ref=f1e215] [cursor=pointer]
+                      - img "copy" [ref=f1e218] [cursor=pointer]
+                      - img "edit" [ref=f1e221] [cursor=pointer]
+                      - img "delete" [ref=f1e224] [cursor=pointer]
+                - row [ref=f1e227]:
+                  - cell [ref=f1e228]:
+                    - button "展开行" [ref=f1e229] [cursor=pointer]
+                  - cell "断链问题测试" [ref=f1e230]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata命令测试" [ref=f1e232]
+                  - cell "查看" [ref=f1e234]
+                  - cell "不锁设备" [ref=f1e235]
+                  - cell "海东 金海东" [ref=f1e236]:
+                    - generic [ref=f1e237]:
+                      - generic [ref=f1e238]: 海东
+                      - generic [ref=f1e240]: 金海东
+                  - cell "2026-06-02" [ref=f1e241]
+                  - cell "思洋 刘思洋" [ref=f1e242]:
+                    - generic [ref=f1e243]:
+                      - generic [ref=f1e244]: 思洋
+                      - generic [ref=f1e246]: 刘思洋
+                  - cell "未设置" [ref=f1e247]
+                  - cell [ref=f1e248]
+                  - cell [ref=f1e249]:
+                    - generic [ref=f1e250]:
+                      - img "caret-right" [ref=f1e251] [cursor=pointer]
+                      - img "retweet" [ref=f1e254] [cursor=pointer]
+                      - img "copy" [ref=f1e257] [cursor=pointer]
+                      - img "edit" [ref=f1e260] [cursor=pointer]
+                      - img "delete" [ref=f1e263] [cursor=pointer]
+                - row [ref=f1e266]:
+                  - cell [ref=f1e267]:
+                    - button "展开行" [ref=f1e268] [cursor=pointer]
+                  - cell "【S3100】性能_三星" [ref=f1e269]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/performance_spec" [ref=f1e271]
+                  - cell "查看" [ref=f1e273]
+                  - cell "不锁设备" [ref=f1e274]
+                  - cell "姣姣 杨姣姣" [ref=f1e275]:
+                    - generic [ref=f1e276]:
+                      - generic [ref=f1e277]: 姣姣
+                      - generic [ref=f1e279]: 杨姣姣
+                  - cell "2026-05-28" [ref=f1e280]
+                  - cell "姣姣 杨姣姣" [ref=f1e281]:
+                    - generic [ref=f1e282]:
+                      - generic [ref=f1e283]: 姣姣
+                      - generic [ref=f1e285]: 杨姣姣
+                  - cell "未设置" [ref=f1e286]
+                  - cell [ref=f1e287]
+                  - cell [ref=f1e288]:
+                    - generic [ref=f1e289]:
+                      - img "caret-right" [ref=f1e290] [cursor=pointer]
+                      - img "retweet" [ref=f1e293] [cursor=pointer]
+                      - img "copy" [ref=f1e296] [cursor=pointer]
+                      - img "edit" [ref=f1e299] [cursor=pointer]
+                      - img "delete" [ref=f1e302] [cursor=pointer]
+                - row [ref=f1e305]:
+                  - cell [ref=f1e306]:
+                    - button "展开行" [ref=f1e307] [cursor=pointer]
+                  - cell "【兼容性55】DCreboot降速复现" [ref=f1e308]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata_compatibility_test" [ref=f1e310]
+                  - cell "查看" [ref=f1e312]
+                  - cell "不锁设备" [ref=f1e313]
+                  - cell "更新 王更新" [ref=f1e314]:
+                    - generic [ref=f1e315]:
+                      - generic [ref=f1e316]: 更新
+                      - generic [ref=f1e318]: 王更新
+                  - cell "2026-05-27" [ref=f1e319]
+                  - cell "更新 王更新" [ref=f1e320]:
+                    - generic [ref=f1e321]:
+                      - generic [ref=f1e322]: 更新
+                      - generic [ref=f1e324]: 王更新
+                  - cell "未设置" [ref=f1e325]
+                  - cell [ref=f1e326]
+                  - cell [ref=f1e327]:
+                    - generic [ref=f1e328]:
+                      - img "caret-right" [ref=f1e329] [cursor=pointer]
+                      - img "retweet" [ref=f1e332] [cursor=pointer]
+                      - img "copy" [ref=f1e335] [cursor=pointer]
+                      - img "edit" [ref=f1e338] [cursor=pointer]
+                      - img "delete" [ref=f1e341] [cursor=pointer]
+                - row [ref=f1e344]:
+                  - cell [ref=f1e345]:
+                    - button "展开行" [ref=f1e346] [cursor=pointer]
+                  - cell "【兼容性51】热插拔掉速复现" [ref=f1e347]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata_compatibility_test" [ref=f1e349]
+                  - cell "查看" [ref=f1e351]
+                  - cell "不锁设备" [ref=f1e352]
+                  - cell "更新 王更新" [ref=f1e353]:
+                    - generic [ref=f1e354]:
+                      - generic [ref=f1e355]: 更新
+                      - generic [ref=f1e357]: 王更新
+                  - cell "2026-05-27" [ref=f1e358]
+                  - cell "更新 王更新" [ref=f1e359]:
+                    - generic [ref=f1e360]:
+                      - generic [ref=f1e361]: 更新
+                      - generic [ref=f1e363]: 王更新
+                  - cell "未设置" [ref=f1e364]
+                  - cell [ref=f1e365]
+                  - cell [ref=f1e366]:
+                    - generic [ref=f1e367]:
+                      - img "caret-right" [ref=f1e368] [cursor=pointer]
+                      - img "retweet" [ref=f1e371] [cursor=pointer]
+                      - img "copy" [ref=f1e374] [cursor=pointer]
+                      - img "edit" [ref=f1e377] [cursor=pointer]
+                      - img "delete" [ref=f1e380] [cursor=pointer]
+                - row [ref=f1e383]:
+                  - cell [ref=f1e384]:
+                    - button "展开行" [ref=f1e385] [cursor=pointer]
+                  - cell "【兼容性-158】9460+EXP_RAID" [ref=f1e386]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata_compatibility_test" [ref=f1e388]
+                  - cell "查看" [ref=f1e390]
+                  - cell "不锁设备" [ref=f1e391]
+                  - cell "更新 王更新" [ref=f1e392]:
+                    - generic [ref=f1e393]:
+                      - generic [ref=f1e394]: 更新
+                      - generic [ref=f1e396]: 王更新
+                  - cell "2026-05-26" [ref=f1e397]
+                  - cell "更新 王更新" [ref=f1e398]:
+                    - generic [ref=f1e399]:
+                      - generic [ref=f1e400]: 更新
+                      - generic [ref=f1e402]: 王更新
+                  - cell "未设置" [ref=f1e403]
+                  - cell [ref=f1e404]
+                  - cell [ref=f1e405]:
+                    - generic [ref=f1e406]:
+                      - img "caret-right" [ref=f1e407] [cursor=pointer]
+                      - img "retweet" [ref=f1e410] [cursor=pointer]
+                      - img "copy" [ref=f1e413] [cursor=pointer]
+                      - img "edit" [ref=f1e416] [cursor=pointer]
+                      - img "delete" [ref=f1e419] [cursor=pointer]
+                - row [ref=f1e422]:
+                  - cell [ref=f1e423]:
+                    - button "展开行" [ref=f1e424] [cursor=pointer]
+                  - cell "【8560】冒烟-mp-simu" [ref=f1e425]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/【8560】【U0000109】冒烟测试" [ref=f1e427]
+                  - cell "查看" [ref=f1e429]
+                  - cell "不锁设备" [ref=f1e430]
+                  - cell "文华 高文华" [ref=f1e431]:
+                    - generic [ref=f1e432]:
+                      - generic [ref=f1e433]: 文华
+                      - generic [ref=f1e435]: 高文华
+                  - cell "2026-05-26" [ref=f1e436]
+                  - cell "思洋 刘思洋" [ref=f1e437]:
+                    - generic [ref=f1e438]:
+                      - generic [ref=f1e439]: 思洋
+                      - generic [ref=f1e441]: 刘思洋
+                  - cell "未设置" [ref=f1e442]
+                  - cell [ref=f1e443]
+                  - cell [ref=f1e444]:
+                    - generic [ref=f1e445]:
+                      - img "caret-right" [ref=f1e446] [cursor=pointer]
+                      - img "retweet" [ref=f1e449] [cursor=pointer]
+                      - img "copy" [ref=f1e452] [cursor=pointer]
+                      - img "edit" [ref=f1e455] [cursor=pointer]
+                      - img "delete" [ref=f1e458] [cursor=pointer]
+                - row [ref=f1e461]:
+                  - cell [ref=f1e462]:
+                    - button "展开行" [ref=f1e463] [cursor=pointer]
+                  - cell "sanitize_test_Q" [ref=f1e464]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata_sanitize" [ref=f1e466]
+                  - cell "查看" [ref=f1e468]
+                  - cell "不锁设备" [ref=f1e469]
+                  - cell "更新 王更新" [ref=f1e470]:
+                    - generic [ref=f1e471]:
+                      - generic [ref=f1e472]: 更新
+                      - generic [ref=f1e474]: 王更新
+                  - cell "2026-05-20" [ref=f1e475]
+                  - cell "更新 王更新" [ref=f1e476]:
+                    - generic [ref=f1e477]:
+                      - generic [ref=f1e478]: 更新
+                      - generic [ref=f1e480]: 王更新
+                  - cell "未设置" [ref=f1e481]
+                  - cell [ref=f1e482]
+                  - cell [ref=f1e483]:
+                    - generic [ref=f1e484]:
+                      - img "caret-right" [ref=f1e485] [cursor=pointer]
+                      - img "retweet" [ref=f1e488] [cursor=pointer]
+                      - img "copy" [ref=f1e491] [cursor=pointer]
+                      - img "edit" [ref=f1e494] [cursor=pointer]
+                      - img "delete" [ref=f1e497] [cursor=pointer]
+                - row [ref=f1e500]:
+                  - cell [ref=f1e501]:
+                    - button "展开行" [ref=f1e502] [cursor=pointer]
+                  - cell "【S3100】【GC与巡检任务】回归2150" [ref=f1e503]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/S3100 CI 迭代测试" [ref=f1e505]
+                  - cell "查看" [ref=f1e507]
+                  - cell "锁设备" [ref=f1e508]
+                  - cell "湛宇 周湛宇" [ref=f1e509]:
+                    - generic [ref=f1e510]:
+                      - generic [ref=f1e511]: 湛宇
+                      - generic [ref=f1e513]: 周湛宇
+                  - cell "2026-05-11" [ref=f1e514]
+                  - cell "湛宇 周湛宇" [ref=f1e515]:
+                    - generic [ref=f1e516]:
+                      - generic [ref=f1e517]: 湛宇
+                      - generic [ref=f1e519]: 周湛宇
+                  - cell "未设置" [ref=f1e520]
+                  - cell [ref=f1e521]
+                  - cell [ref=f1e522]:
+                    - generic [ref=f1e523]:
+                      - img "caret-right" [ref=f1e524] [cursor=pointer]
+                      - img "retweet" [ref=f1e527] [cursor=pointer]
+                      - img "copy" [ref=f1e530] [cursor=pointer]
+                      - img "edit" [ref=f1e533] [cursor=pointer]
+                      - img "delete" [ref=f1e536] [cursor=pointer]
+                - row [ref=f1e539]:
+                  - cell [ref=f1e540]:
+                    - button "展开行" [ref=f1e541] [cursor=pointer]
+                  - cell "服务器55_建链测试1" [ref=f1e542]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/sata_compatibility_test" [ref=f1e544]
+                  - cell "查看" [ref=f1e546]
+                  - cell "不锁设备" [ref=f1e547]
+                  - cell "更新 王更新" [ref=f1e548]:
+                    - generic [ref=f1e549]:
+                      - generic [ref=f1e550]: 更新
+                      - generic [ref=f1e552]: 王更新
+                  - cell "2026-04-17" [ref=f1e553]
+                  - cell "更新 王更新" [ref=f1e554]:
+                    - generic [ref=f1e555]:
+                      - generic [ref=f1e556]: 更新
+                      - generic [ref=f1e558]: 王更新
+                  - cell "未设置" [ref=f1e559]
+                  - cell [ref=f1e560]
+                  - cell [ref=f1e561]:
+                    - generic [ref=f1e562]:
+                      - img "caret-right" [ref=f1e563] [cursor=pointer]
+                      - img "retweet" [ref=f1e566] [cursor=pointer]
+                      - img "copy" [ref=f1e569] [cursor=pointer]
+                      - img "edit" [ref=f1e572] [cursor=pointer]
+                      - img "delete" [ref=f1e575] [cursor=pointer]
+                - row [ref=f1e578]:
+                  - cell [ref=f1e579]:
+                    - button "展开行" [ref=f1e580] [cursor=pointer]
+                  - cell "lpm" [ref=f1e581]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/all" [ref=f1e583]
+                  - cell "查看" [ref=f1e585]
+                  - cell "不锁设备" [ref=f1e586]
+                  - cell "方明 杨方明" [ref=f1e587]:
+                    - generic [ref=f1e588]:
+                      - generic [ref=f1e589]: 方明
+                      - generic [ref=f1e591]: 杨方明
+                  - cell "2026-04-01" [ref=f1e592]
+                  - cell "方明 杨方明" [ref=f1e593]:
+                    - generic [ref=f1e594]:
+                      - generic [ref=f1e595]: 方明
+                      - generic [ref=f1e597]: 杨方明
+                  - cell "未设置" [ref=f1e598]
+                  - cell [ref=f1e599]
+                  - cell [ref=f1e600]:
+                    - generic [ref=f1e601]:
+                      - img "caret-right" [ref=f1e602] [cursor=pointer]
+                      - img "retweet" [ref=f1e605] [cursor=pointer]
+                      - img "copy" [ref=f1e608] [cursor=pointer]
+                      - img "edit" [ref=f1e611] [cursor=pointer]
+                      - img "delete" [ref=f1e614] [cursor=pointer]
+                - row [ref=f1e617]:
+                  - cell [ref=f1e618]:
+                    - button "展开行" [ref=f1e619] [cursor=pointer]
+                  - cell "3361回片后AT测试_pynvme3" [ref=f1e620]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试_NVME2" [ref=f1e622]
+                  - cell "查看" [ref=f1e624]
+                  - cell "不锁设备" [ref=f1e625]
+                  - cell "李凡 李凡" [ref=f1e626]:
+                    - generic [ref=f1e627]:
+                      - generic [ref=f1e628]: 李凡
+                      - generic [ref=f1e630]: 李凡
+                  - cell "2026-03-21" [ref=f1e631]
+                  - cell "李凡 李凡" [ref=f1e632]:
+                    - generic [ref=f1e633]:
+                      - generic [ref=f1e634]: 李凡
+                      - generic [ref=f1e636]: 李凡
+                  - cell "未设置" [ref=f1e637]
+                  - cell [ref=f1e638]
+                  - cell [ref=f1e639]:
+                    - generic [ref=f1e640]:
+                      - img "caret-right" [ref=f1e641] [cursor=pointer]
+                      - img "retweet" [ref=f1e644] [cursor=pointer]
+                      - img "copy" [ref=f1e647] [cursor=pointer]
+                      - img "edit" [ref=f1e650] [cursor=pointer]
+                      - img "delete" [ref=f1e653] [cursor=pointer]
+                - row [ref=f1e656]:
+                  - cell [ref=f1e657]:
+                    - button "展开行" [ref=f1e658] [cursor=pointer]
+                  - cell "3361_老化板_长稳" [ref=f1e659]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试长稳" [ref=f1e661]
+                  - cell "查看" [ref=f1e663]
+                  - cell "不锁设备" [ref=f1e664]
+                  - cell "欣怡 张欣怡" [ref=f1e665]:
+                    - generic [ref=f1e666]:
+                      - generic [ref=f1e667]: 欣怡
+                      - generic [ref=f1e669]: 张欣怡
+                  - cell "2026-03-14" [ref=f1e670]
+                  - cell "欣怡 张欣怡" [ref=f1e671]:
+                    - generic [ref=f1e672]:
+                      - generic [ref=f1e673]: 欣怡
+                      - generic [ref=f1e675]: 张欣怡
+                  - cell "未设置" [ref=f1e676]
+                  - cell [ref=f1e677]
+                  - cell [ref=f1e678]:
+                    - generic [ref=f1e679]:
+                      - img "caret-right" [ref=f1e680] [cursor=pointer]
+                      - img "retweet" [ref=f1e683] [cursor=pointer]
+                      - img "copy" [ref=f1e686] [cursor=pointer]
+                      - img "edit" [ref=f1e689] [cursor=pointer]
+                      - img "delete" [ref=f1e692] [cursor=pointer]
+                - row [ref=f1e695]:
+                  - cell [ref=f1e696]:
+                    - button "展开行" [ref=f1e697] [cursor=pointer]
+                  - cell "3100_evb_长稳2" [ref=f1e698]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试长稳" [ref=f1e700]
+                  - cell "查看" [ref=f1e702]
+                  - cell "不锁设备" [ref=f1e703]
+                  - cell "欣怡 张欣怡" [ref=f1e704]:
+                    - generic [ref=f1e705]:
+                      - generic [ref=f1e706]: 欣怡
+                      - generic [ref=f1e708]: 张欣怡
+                  - cell "2026-03-07" [ref=f1e709]
+                  - cell "欣怡 张欣怡" [ref=f1e710]:
+                    - generic [ref=f1e711]:
+                      - generic [ref=f1e712]: 欣怡
+                      - generic [ref=f1e714]: 张欣怡
+                  - cell "未设置" [ref=f1e715]
+                  - cell [ref=f1e716]
+                  - cell [ref=f1e717]:
+                    - generic [ref=f1e718]:
+                      - img "caret-right" [ref=f1e719] [cursor=pointer]
+                      - img "retweet" [ref=f1e722] [cursor=pointer]
+                      - img "copy" [ref=f1e725] [cursor=pointer]
+                      - img "edit" [ref=f1e728] [cursor=pointer]
+                      - img "delete" [ref=f1e731] [cursor=pointer]
+                - row [ref=f1e734]:
+                  - cell [ref=f1e735]:
+                    - button "展开行" [ref=f1e736] [cursor=pointer]
+                  - cell "3100_evb_长稳" [ref=f1e737]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试长稳" [ref=f1e739]
+                  - cell "查看" [ref=f1e741]
+                  - cell "不锁设备" [ref=f1e742]
+                  - cell "欣怡 张欣怡" [ref=f1e743]:
+                    - generic [ref=f1e744]:
+                      - generic [ref=f1e745]: 欣怡
+                      - generic [ref=f1e747]: 张欣怡
+                  - cell "2026-03-06" [ref=f1e748]
+                  - cell "欣怡 张欣怡" [ref=f1e749]:
+                    - generic [ref=f1e750]:
+                      - generic [ref=f1e751]: 欣怡
+                      - generic [ref=f1e753]: 张欣怡
+                  - cell "未设置" [ref=f1e754]
+                  - cell [ref=f1e755]
+                  - cell [ref=f1e756]:
+                    - generic [ref=f1e757]:
+                      - img "caret-right" [ref=f1e758] [cursor=pointer]
+                      - img "retweet" [ref=f1e761] [cursor=pointer]
+                      - img "copy" [ref=f1e764] [cursor=pointer]
+                      - img "edit" [ref=f1e767] [cursor=pointer]
+                      - img "delete" [ref=f1e770] [cursor=pointer]
+                - row [ref=f1e773]:
+                  - cell [ref=f1e774]:
+                    - button "展开行" [ref=f1e775] [cursor=pointer]
+                  - cell "3100_evb_io_new" [ref=f1e776]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试长稳" [ref=f1e778]
+                  - cell "查看" [ref=f1e780]
+                  - cell "不锁设备" [ref=f1e781]
+                  - cell "欣怡 张欣怡" [ref=f1e782]:
+                    - generic [ref=f1e783]:
+                      - generic [ref=f1e784]: 欣怡
+                      - generic [ref=f1e786]: 张欣怡
+                  - cell "2026-03-04" [ref=f1e787]
+                  - cell "欣怡 张欣怡" [ref=f1e788]:
+                    - generic [ref=f1e789]:
+                      - generic [ref=f1e790]: 欣怡
+                      - generic [ref=f1e792]: 张欣怡
+                  - cell "未设置" [ref=f1e793]
+                  - cell [ref=f1e794]
+                  - cell [ref=f1e795]:
+                    - generic [ref=f1e796]:
+                      - img "caret-right" [ref=f1e797] [cursor=pointer]
+                      - img "retweet" [ref=f1e800] [cursor=pointer]
+                      - img "copy" [ref=f1e803] [cursor=pointer]
+                      - img "edit" [ref=f1e806] [cursor=pointer]
+                      - img "delete" [ref=f1e809] [cursor=pointer]
+                - row [ref=f1e812]:
+                  - cell [ref=f1e813]:
+                    - button "展开行" [ref=f1e814] [cursor=pointer]
+                  - cell "3361回片后AT测试_NVME" [ref=f1e815]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/3361回片测试_NVME2" [ref=f1e817]
+                  - cell "查看" [ref=f1e819]
+                  - cell "不锁设备" [ref=f1e820]
+                  - cell "李凡 李凡" [ref=f1e821]:
+                    - generic [ref=f1e822]:
+                      - generic [ref=f1e823]: 李凡
+                      - generic [ref=f1e825]: 李凡
+                  - cell "2026-02-28" [ref=f1e826]
+                  - cell "李凡 李凡" [ref=f1e827]:
+                    - generic [ref=f1e828]:
+                      - generic [ref=f1e829]: 李凡
+                      - generic [ref=f1e831]: 李凡
+                  - cell "未设置" [ref=f1e832]
+                  - cell [ref=f1e833]
+                  - cell [ref=f1e834]:
+                    - generic [ref=f1e835]:
+                      - img "caret-right" [ref=f1e836] [cursor=pointer]
+                      - img "retweet" [ref=f1e839] [cursor=pointer]
+                      - img "copy" [ref=f1e842] [cursor=pointer]
+                      - img "edit" [ref=f1e845] [cursor=pointer]
+                      - img "delete" [ref=f1e848] [cursor=pointer]
+                - row [ref=f1e851]:
+                  - cell [ref=f1e852]:
+                    - button "展开行" [ref=f1e853] [cursor=pointer]
+                  - cell "【S3100】 UT测试 sata_compatibility" [ref=f1e854]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/S3100兼容性测试本地任务" [ref=f1e856]
+                  - cell "查看" [ref=f1e858]
+                  - cell "不锁设备" [ref=f1e859]
+                  - cell "琬玉 羊琬玉" [ref=f1e860]:
+                    - generic [ref=f1e861]:
+                      - generic [ref=f1e862]: 琬玉
+                      - generic [ref=f1e864]: 羊琬玉
+                  - cell "2026-02-12" [ref=f1e865]
+                  - cell "琬玉 羊琬玉" [ref=f1e866]:
+                    - generic [ref=f1e867]:
+                      - generic [ref=f1e868]: 琬玉
+                      - generic [ref=f1e870]: 羊琬玉
+                  - cell "未设置" [ref=f1e871]
+                  - cell [ref=f1e872]
+                  - cell [ref=f1e873]:
+                    - generic [ref=f1e874]:
+                      - img "caret-right" [ref=f1e875] [cursor=pointer]
+                      - img "retweet" [ref=f1e878] [cursor=pointer]
+                      - img "copy" [ref=f1e881] [cursor=pointer]
+                      - img "edit" [ref=f1e884] [cursor=pointer]
+                      - img "delete" [ref=f1e887] [cursor=pointer]
+                - row [ref=f1e890]:
+                  - cell [ref=f1e891]:
+                    - button "展开行" [ref=f1e892] [cursor=pointer]
+                  - cell "【S3100】S3100V1R1-1627 vdbench数据不一致复现" [ref=f1e893]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/s3100_io" [ref=f1e895]
+                  - cell "查看" [ref=f1e897]
+                  - cell "锁设备" [ref=f1e898]
+                  - cell "张龙 张龙" [ref=f1e899]:
+                    - generic [ref=f1e900]:
+                      - generic [ref=f1e901]: 张龙
+                      - generic [ref=f1e903]: 张龙
+                  - cell "2026-01-30" [ref=f1e904]
+                  - cell "张龙 张龙" [ref=f1e905]:
+                    - generic [ref=f1e906]:
+                      - generic [ref=f1e907]: 张龙
+                      - generic [ref=f1e909]: 张龙
+                  - cell "未设置" [ref=f1e910]
+                  - cell [ref=f1e911]
+                  - cell [ref=f1e912]:
+                    - generic [ref=f1e913]:
+                      - img "caret-right" [ref=f1e914] [cursor=pointer]
+                      - img "retweet" [ref=f1e917] [cursor=pointer]
+                      - img "copy" [ref=f1e920] [cursor=pointer]
+                      - img "edit" [ref=f1e923] [cursor=pointer]
+                      - img "delete" [ref=f1e926] [cursor=pointer]
+                - row [ref=f1e929]:
+                  - cell [ref=f1e930]:
+                    - button "展开行" [ref=f1e931] [cursor=pointer]
+                  - cell "【S3100】GC 巡检_复现S3100V1R1-1371-V3" [ref=f1e932]
+                  - cell "Hima 3361 V100芯片解决方案项目/Hima测试库/【S3100】GC_巡检_all迭代" [ref=f1e934]
+                  - cell "查看" [ref=f1e936]
+                  - cell "不锁设备" [ref=f1e937]
+                  - cell "湛宇 周湛宇" [ref=f1e938]:
+                    - generic [ref=f1e939]:
+                      - generic [ref=f1e940]: 湛宇
+                      - generic [ref=f1e942]: 周湛宇
+                  - cell "2026-01-17" [ref=f1e943]
+                  - cell "湛宇 周湛宇" [ref=f1e944]:
+                    - generic [ref=f1e945]:
+                      - generic [ref=f1e946]: 湛宇
+                      - generic [ref=f1e948]: 周湛宇
+                  - cell "未设置" [ref=f1e949]
+                  - cell [ref=f1e950]
+                  - cell [ref=f1e951]:
+                    - generic [ref=f1e952]:
+                      - img "caret-right" [ref=f1e953] [cursor=pointer]
+                      - img "retweet" [ref=f1e956] [cursor=pointer]
+                      - img "copy" [ref=f1e959] [cursor=pointer]
+                      - img "edit" [ref=f1e962] [cursor=pointer]
+                      - img "delete" [ref=f1e965] [cursor=pointer]
+          - list [ref=f1e968]:
+            - listitem [ref=f1e969]: 共 66 条
+            - listitem "上一页" [ref=f1e970]:
+              - button [disabled] [ref=f1e971]:
+                - img "left" [ref=f1e972]
+            - listitem "1" [ref=f1e975] [cursor=pointer]
+            - listitem "2" [ref=f1e977] [cursor=pointer]
+            - listitem "3" [ref=f1e979] [cursor=pointer]
+            - listitem "4" [ref=f1e981] [cursor=pointer]
+            - listitem "下一页" [ref=f1e983] [cursor=pointer]:
+              - button [ref=f1e984]:
+                - img "right" [ref=f1e985]
+            - listitem [ref=f1e988]:
+              - generic [ref=f1e990] [cursor=pointer]:
+                - combobox [ref=f1e992]
+                - generic [ref=f1e993]: 20 条/页
+              - generic [ref=f1e994]:
+                - text: 跳至
+                - textbox [ref=f1e995]
+                - text: 页

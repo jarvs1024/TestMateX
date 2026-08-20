@@ -1,0 +1,455 @@
+- generic [ref=f8e1]:
+  - generic [ref=f8e4]:
+    - complementary [ref=f8e5]:
+      - menu [ref=f8e7]:
+        - menuitem "home 首页" [ref=f8e8] [cursor=pointer]:
+          - img "home" [ref=f8e9]
+          - generic [ref=f8e12]: 首页
+        - menuitem "slack 需求管理" [ref=f8e13] [cursor=pointer]:
+          - img "slack" [ref=f8e14]
+          - generic [ref=f8e17]: 需求管理
+        - menuitem "code-sandbox 项目管理" [ref=f8e18] [cursor=pointer]:
+          - img "code-sandbox" [ref=f8e19]
+          - generic [ref=f8e22]: 项目管理
+        - menuitem "experiment 测试管理" [ref=f8e23] [cursor=pointer]:
+          - img "experiment" [ref=f8e24]
+          - generic [ref=f8e27]: 测试管理
+        - menuitem "bug 问题单管理" [ref=f8e28] [cursor=pointer]:
+          - img "bug" [ref=f8e29]
+          - generic [ref=f8e33]: 问题单管理
+        - menuitem "trophy 积分统计" [ref=f8e34] [cursor=pointer]:
+          - img "trophy" [ref=f8e35]
+          - generic [ref=f8e38]: 积分统计
+        - generic [ref=f8e39] [cursor=pointer]:
+          - img "history" [ref=f8e40]
+          - generic [ref=f8e43]: 自动化管理
+        - list [ref=f8e145]:
+          - menuitem "执行项目" [ref=f8e44] [cursor=pointer]
+          - menuitem "日志搜集系统" [ref=f8e46] [cursor=pointer]
+        - menuitem "history 兼容性配置管理" [ref=f8e48] [cursor=pointer]:
+          - img "history" [ref=f8e49]
+          - generic [ref=f8e52]: 兼容性配置管理
+        - menuitem "calendar 会议管理" [ref=f8e53] [cursor=pointer]:
+          - img "calendar" [ref=f8e54]
+          - generic [ref=f8e57]: 会议管理
+        - generic [ref=f8e58] [cursor=pointer]:
+          - img "appstore" [ref=f8e59]
+          - generic [ref=f8e62]: SSD环境管理
+        - generic [ref=f8e63] [cursor=pointer]:
+          - img "appstore" [ref=f8e64]
+          - generic [ref=f8e67]: CXL环境管理
+        - generic [ref=f8e68] [cursor=pointer]:
+          - img "line-chart" [ref=f8e69]
+          - generic [ref=f8e72]: 竞品分析
+        - generic [ref=f8e73] [cursor=pointer]:
+          - img "team" [ref=f8e74]
+          - generic [ref=f8e77]: 组织管理
+      - img "left" [ref=f8e79] [cursor=pointer]
+    - generic [ref=f8e82]:
+      - generic [ref=f8e84]:
+        - generic [ref=f8e85] [cursor=pointer]: 克江
+        - img "logo" [ref=f8e88]
+      - main [ref=f8e89]:
+        - generic [ref=f8e90]:
+          - generic [ref=f8e91]:
+            - generic [ref=f8e92]:
+              - generic [ref=f8e93]:
+                - generic [ref=f8e94] [cursor=pointer]:
+                  - img "home" [ref=f8e95]
+                  - text: 执行项目
+                - text: /
+              - generic [ref=f8e98]:
+                - generic [ref=f8e99] [cursor=pointer]: "3361"
+                - text: /
+              - generic [ref=f8e101]:
+                - generic [ref=f8e102] [cursor=pointer]: 【S3100】【GC与巡检任务】回归2150
+                - img "down" [ref=f8e103]
+            - menu [ref=f8e106]:
+              - menuitem "关联用例" [ref=f8e107] [cursor=pointer]
+              - menuitem "关联SSD&CXL" [ref=f8e109] [cursor=pointer]
+              - menuitem "关联Switch" [ref=f8e111] [cursor=pointer]
+              - menuitem "关联主机" [ref=f8e113] [cursor=pointer]
+              - menuitem "执行详情" [ref=f8e115] [cursor=pointer]
+          - generic [ref=f8e126]:
+            - generic [ref=f8e127]:
+              - generic [ref=f8e129]:
+                - textbox "请输入" [ref=f8e130]
+                - button [ref=f8e132] [cursor=pointer]:
+                  - img "search" [ref=f8e133]
+              - button "批量删除" [disabled] [ref=f8e136]
+            - generic [ref=f8e154]:
+              - generic [ref=f8e156]:
+                - table [ref=f8e158]:
+                  - rowgroup [ref=f8e169]:
+                    - row "执行名称 执行人 filter 开始时间 结束时间 执行总时间 caret-up caret-down 执行情况 filter 操作" [ref=f8e170]:
+                      - columnheader [ref=f8e171]:
+                        - checkbox [ref=f8e175] [cursor=pointer]
+                      - columnheader "执行名称" [ref=f8e177]
+                      - columnheader "执行人 filter" [ref=f8e178]:
+                        - generic [ref=f8e179]:
+                          - generic [ref=f8e180]: 执行人
+                          - button [ref=f8e181] [cursor=pointer]:
+                            - img "filter" [ref=f8e182]
+                      - columnheader "开始时间" [ref=f8e185]
+                      - columnheader "结束时间" [ref=f8e186]
+                      - columnheader "执行总时间 caret-up caret-down" [ref=f8e187] [cursor=pointer]:
+                        - generic [ref=f8e188]:
+                          - generic [ref=f8e189]: 执行总时间
+                          - generic [ref=f8e191]:
+                            - img "caret-up" [ref=f8e192]
+                            - img "caret-down" [ref=f8e195]
+                      - columnheader "执行情况 filter" [ref=f8e198]:
+                        - generic [ref=f8e199]:
+                          - generic [ref=f8e200]: 执行情况
+                          - button [ref=f8e201] [cursor=pointer]:
+                            - img "filter" [ref=f8e202]
+                      - columnheader "操作" [ref=f8e205]
+                      - columnheader [ref=f8e206]
+                - table [ref=f8e208]:
+                  - rowgroup [ref=f8e218]:
+                    - row "S3100 CI 迭代测试_202606081444 湛宇 周湛宇 2026-06-08 14:44:41 2026-06-08 22:57:46 8时13分5秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e219]:
+                      - cell [ref=f8e220]:
+                        - checkbox [ref=f8e223] [cursor=pointer]
+                      - cell "S3100 CI 迭代测试_202606081444" [ref=f8e225]
+                      - cell "湛宇 周湛宇" [ref=f8e227]:
+                        - generic [ref=f8e228]:
+                          - generic [ref=f8e229]: 湛宇
+                          - generic [ref=f8e231]: 周湛宇
+                      - cell "2026-06-08 14:44:41" [ref=f8e232]
+                      - cell "2026-06-08 22:57:46" [ref=f8e233]
+                      - cell "8时13分5秒" [ref=f8e234]
+                      - cell "执行成功" [ref=f8e235]
+                      - cell [ref=f8e237]:
+                        - generic [ref=f8e238]:
+                          - img "pause" [ref=f8e239]
+                          - img "caret-right" [ref=f8e243] [cursor=pointer]
+                          - img "file-sync" [ref=f8e246] [cursor=pointer]
+                          - img "download" [ref=f8e249] [cursor=pointer]
+                          - img "mail" [ref=f8e252] [cursor=pointer]
+                          - img "delete" [ref=f8e255] [cursor=pointer]
+                    - row "环境检查任务 湛宇 周湛宇 2026-06-08 14:43:51 2026-06-08 14:44:27 0时0分36秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e258]:
+                      - cell [ref=f8e259]:
+                        - checkbox [ref=f8e262] [cursor=pointer]
+                      - cell "环境检查任务" [ref=f8e264]
+                      - cell "湛宇 周湛宇" [ref=f8e266]:
+                        - generic [ref=f8e267]:
+                          - generic [ref=f8e268]: 湛宇
+                          - generic [ref=f8e270]: 周湛宇
+                      - cell "2026-06-08 14:43:51" [ref=f8e271]
+                      - cell "2026-06-08 14:44:27" [ref=f8e272]
+                      - cell "0时0分36秒" [ref=f8e273]
+                      - cell "执行成功" [ref=f8e274]
+                      - cell [ref=f8e276]:
+                        - generic [ref=f8e277]:
+                          - img "pause" [ref=f8e278]
+                          - img "caret-right" [ref=f8e282] [cursor=pointer]
+                          - img "file-sync" [ref=f8e285] [cursor=pointer]
+                          - img "download" [ref=f8e288] [cursor=pointer]
+                          - img "mail" [ref=f8e291] [cursor=pointer]
+                          - img "delete" [ref=f8e294] [cursor=pointer]
+                    - row "S3100 CI 迭代测试_202605212144 湛宇 周湛宇 2026-05-21 21:44:20 2026-05-22 21:57:05 24时12分45秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e297]:
+                      - cell [ref=f8e298]:
+                        - checkbox [ref=f8e301] [cursor=pointer]
+                      - cell "S3100 CI 迭代测试_202605212144" [ref=f8e303]
+                      - cell "湛宇 周湛宇" [ref=f8e305]:
+                        - generic [ref=f8e306]:
+                          - generic [ref=f8e307]: 湛宇
+                          - generic [ref=f8e309]: 周湛宇
+                      - cell "2026-05-21 21:44:20" [ref=f8e310]
+                      - cell "2026-05-22 21:57:05" [ref=f8e311]
+                      - cell "24时12分45秒" [ref=f8e312]
+                      - cell "执行成功" [ref=f8e313]
+                      - cell [ref=f8e315]:
+                        - generic [ref=f8e316]:
+                          - img "pause" [ref=f8e317]
+                          - img "caret-right" [ref=f8e321] [cursor=pointer]
+                          - img "file-sync" [ref=f8e324] [cursor=pointer]
+                          - img "download" [ref=f8e327] [cursor=pointer]
+                          - img "mail" [ref=f8e330] [cursor=pointer]
+                          - img "delete" [ref=f8e333] [cursor=pointer]
+                    - row "环境检查任务 湛宇 周湛宇 2026-05-21 21:42:23 2026-05-21 21:43:30 0时1分7秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e336]:
+                      - cell [ref=f8e337]:
+                        - checkbox [ref=f8e340] [cursor=pointer]
+                      - cell "环境检查任务" [ref=f8e342]
+                      - cell "湛宇 周湛宇" [ref=f8e344]:
+                        - generic [ref=f8e345]:
+                          - generic [ref=f8e346]: 湛宇
+                          - generic [ref=f8e348]: 周湛宇
+                      - cell "2026-05-21 21:42:23" [ref=f8e349]
+                      - cell "2026-05-21 21:43:30" [ref=f8e350]
+                      - cell "0时1分7秒" [ref=f8e351]
+                      - cell "执行成功" [ref=f8e352]
+                      - cell [ref=f8e354]:
+                        - generic [ref=f8e355]:
+                          - img "pause" [ref=f8e356]
+                          - img "caret-right" [ref=f8e360] [cursor=pointer]
+                          - img "file-sync" [ref=f8e363] [cursor=pointer]
+                          - img "download" [ref=f8e366] [cursor=pointer]
+                          - img "mail" [ref=f8e369] [cursor=pointer]
+                          - img "delete" [ref=f8e372] [cursor=pointer]
+                    - row "S3100 CI 迭代测试_202605192218 湛宇 周湛宇 2026-05-19 22:18:46 2026-05-21 21:17:26 46时58分40秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e375]:
+                      - cell [ref=f8e376]:
+                        - checkbox [ref=f8e379] [cursor=pointer]
+                      - cell "S3100 CI 迭代测试_202605192218" [ref=f8e381]
+                      - cell "湛宇 周湛宇" [ref=f8e383]:
+                        - generic [ref=f8e384]:
+                          - generic [ref=f8e385]: 湛宇
+                          - generic [ref=f8e387]: 周湛宇
+                      - cell "2026-05-19 22:18:46" [ref=f8e388]
+                      - cell "2026-05-21 21:17:26" [ref=f8e389]
+                      - cell "46时58分40秒" [ref=f8e390]
+                      - cell "执行成功" [ref=f8e391]
+                      - cell [ref=f8e393]:
+                        - generic [ref=f8e394]:
+                          - img "pause" [ref=f8e395]
+                          - img "caret-right" [ref=f8e399] [cursor=pointer]
+                          - img "file-sync" [ref=f8e402] [cursor=pointer]
+                          - img "download" [ref=f8e405] [cursor=pointer]
+                          - img "mail" [ref=f8e408] [cursor=pointer]
+                          - img "delete" [ref=f8e411] [cursor=pointer]
+                    - row "S3100 CI 迭代测试_202605182250 湛宇 周湛宇 2026-05-18 22:50:41 2026-05-19 22:18:30 23时27分49秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e414]:
+                      - cell [ref=f8e415]:
+                        - checkbox [ref=f8e418] [cursor=pointer]
+                      - cell "S3100 CI 迭代测试_202605182250" [ref=f8e420]
+                      - cell "湛宇 周湛宇" [ref=f8e422]:
+                        - generic [ref=f8e423]:
+                          - generic [ref=f8e424]: 湛宇
+                          - generic [ref=f8e426]: 周湛宇
+                      - cell "2026-05-18 22:50:41" [ref=f8e427]
+                      - cell "2026-05-19 22:18:30" [ref=f8e428]
+                      - cell "23时27分49秒" [ref=f8e429]
+                      - cell "执行成功" [ref=f8e430]
+                      - cell [ref=f8e432]:
+                        - generic [ref=f8e433]:
+                          - img "pause" [ref=f8e434]
+                          - img "caret-right" [ref=f8e438] [cursor=pointer]
+                          - img "file-sync" [ref=f8e441] [cursor=pointer]
+                          - img "download" [ref=f8e444] [cursor=pointer]
+                          - img "mail" [ref=f8e447] [cursor=pointer]
+                          - img "delete" [ref=f8e450] [cursor=pointer]
+                    - row "环境检查任务 湛宇 周湛宇 2026-05-18 22:49:16 2026-05-18 22:50:27 0时1分11秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e453]:
+                      - cell [ref=f8e454]:
+                        - checkbox [ref=f8e457] [cursor=pointer]
+                      - cell "环境检查任务" [ref=f8e459]
+                      - cell "湛宇 周湛宇" [ref=f8e461]:
+                        - generic [ref=f8e462]:
+                          - generic [ref=f8e463]: 湛宇
+                          - generic [ref=f8e465]: 周湛宇
+                      - cell "2026-05-18 22:49:16" [ref=f8e466]
+                      - cell "2026-05-18 22:50:27" [ref=f8e467]
+                      - cell "0时1分11秒" [ref=f8e468]
+                      - cell "执行成功" [ref=f8e469]
+                      - cell [ref=f8e471]:
+                        - generic [ref=f8e472]:
+                          - img "pause" [ref=f8e473]
+                          - img "caret-right" [ref=f8e477] [cursor=pointer]
+                          - img "file-sync" [ref=f8e480] [cursor=pointer]
+                          - img "download" [ref=f8e483] [cursor=pointer]
+                          - img "mail" [ref=f8e486] [cursor=pointer]
+                          - img "delete" [ref=f8e489] [cursor=pointer]
+                    - row "环境检查任务 湛宇 周湛宇 2026-05-18 22:43:10 2026-05-18 22:44:52 0时1分42秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e492]:
+                      - cell [ref=f8e493]:
+                        - checkbox [ref=f8e496] [cursor=pointer]
+                      - cell "环境检查任务" [ref=f8e498]
+                      - cell "湛宇 周湛宇" [ref=f8e500]:
+                        - generic [ref=f8e501]:
+                          - generic [ref=f8e502]: 湛宇
+                          - generic [ref=f8e504]: 周湛宇
+                      - cell "2026-05-18 22:43:10" [ref=f8e505]
+                      - cell "2026-05-18 22:44:52" [ref=f8e506]
+                      - cell "0时1分42秒" [ref=f8e507]
+                      - cell "执行成功" [ref=f8e508]
+                      - cell [ref=f8e510]:
+                        - generic [ref=f8e511]:
+                          - img "pause" [ref=f8e512]
+                          - img "caret-right" [ref=f8e516] [cursor=pointer]
+                          - img "file-sync" [ref=f8e519] [cursor=pointer]
+                          - img "download" [ref=f8e522] [cursor=pointer]
+                          - img "mail" [ref=f8e525] [cursor=pointer]
+                          - img "delete" [ref=f8e528] [cursor=pointer]
+                    - row "S3100 CI 迭代测试_202605161813 湛宇 周湛宇 2026-05-16 18:13:36 2026-05-17 19:20:42 25时7分6秒 执行异常 pause caret-right file-sync download mail delete" [ref=f8e531]:
+                      - cell [ref=f8e532]:
+                        - checkbox [ref=f8e535] [cursor=pointer]
+                      - cell "S3100 CI 迭代测试_202605161813" [ref=f8e537]
+                      - cell "湛宇 周湛宇" [ref=f8e539]:
+                        - generic [ref=f8e540]:
+                          - generic [ref=f8e541]: 湛宇
+                          - generic [ref=f8e543]: 周湛宇
+                      - cell "2026-05-16 18:13:36" [ref=f8e544]
+                      - cell "2026-05-17 19:20:42" [ref=f8e545]
+                      - cell "25时7分6秒" [ref=f8e546]
+                      - cell "执行异常" [ref=f8e547]
+                      - cell [ref=f8e549]:
+                        - generic [ref=f8e550]:
+                          - img "pause" [ref=f8e551]
+                          - img "caret-right" [ref=f8e555] [cursor=pointer]
+                          - img "file-sync" [ref=f8e558] [cursor=pointer]
+                          - img "download" [ref=f8e561] [cursor=pointer]
+                          - img "mail" [ref=f8e564] [cursor=pointer]
+                          - img "delete" [ref=f8e567] [cursor=pointer]
+                    - row "环境检查任务 湛宇 周湛宇 2026-05-16 18:11:47 2026-05-16 18:13:25 0时1分38秒 执行成功 pause caret-right file-sync download mail delete" [ref=f8e570]:
+                      - cell [ref=f8e571]:
+                        - checkbox [ref=f8e574] [cursor=pointer]
+                      - cell "环境检查任务" [ref=f8e576]
+                      - cell "湛宇 周湛宇" [ref=f8e578]:
+                        - generic [ref=f8e579]:
+                          - generic [ref=f8e580]: 湛宇
+                          - generic [ref=f8e582]: 周湛宇
+                      - cell "2026-05-16 18:11:47" [ref=f8e583]
+                      - cell "2026-05-16 18:13:25" [ref=f8e584]
+                      - cell "0时1分38秒" [ref=f8e585]
+                      - cell "执行成功" [ref=f8e586]
+                      - cell [ref=f8e588]:
+                        - generic [ref=f8e589]:
+                          - img "pause" [ref=f8e590]
+                          - img "caret-right" [ref=f8e594] [cursor=pointer]
+                          - img "file-sync" [ref=f8e597] [cursor=pointer]
+                          - img "download" [ref=f8e600] [cursor=pointer]
+                          - img "mail" [ref=f8e603] [cursor=pointer]
+                          - img "delete" [ref=f8e606] [cursor=pointer]
+              - list [ref=f8e609]:
+                - listitem [ref=f8e610]: 共 30 条
+                - listitem "上一页" [ref=f8e611]:
+                  - button [disabled] [ref=f8e612]:
+                    - img "left" [ref=f8e613]
+                - listitem "1" [ref=f8e616] [cursor=pointer]
+                - listitem "2" [ref=f8e618] [cursor=pointer]
+                - listitem "3" [ref=f8e620] [cursor=pointer]
+                - listitem "下一页" [ref=f8e622] [cursor=pointer]:
+                  - button [ref=f8e623]:
+                    - img "right" [ref=f8e624]
+                - listitem [ref=f8e627]:
+                  - generic [ref=f8e629] [cursor=pointer]:
+                    - combobox [ref=f8e631]
+                    - generic [ref=f8e632]: 10 条/页
+                  - generic [ref=f8e633]:
+                    - text: 跳至
+                    - textbox [ref=f8e634]
+                    - text: 页
+  - dialog "执行日志" [ref=f8e636]:
+    - document:
+      - generic [ref=f8e637]:
+        - button "Close" [ref=f8e638] [cursor=pointer]:
+          - img "close" [ref=f8e640]
+        - generic [ref=f8e643]: 执行日志
+        - generic [ref=f8e646]:
+          - generic [ref=f8e647]:
+            - generic [ref=f8e648]:
+              - tablist [ref=f8e649]:
+                - tab "模块" [selected] [ref=f8e653] [cursor=pointer]
+              - generic:
+                - generic:
+                  - tabpanel "模块"
+            - generic [ref=f8e654]:
+              - generic [ref=f8e655]:
+                - generic [ref=f8e658]:
+                  - textbox "搜索模块" [ref=f8e659]
+                  - button [ref=f8e661] [cursor=pointer]:
+                    - img "search" [ref=f8e662]
+                - img "arrows-alt" [ref=f8e666] [cursor=pointer]
+              - tree [ref=f8e672]:
+                - generic:
+                  - textbox "for screen reader"
+                - generic [ref=f8e676]:
+                  - generic [ref=f8e679] [cursor=pointer]:
+                    - img "bars" [ref=f8e681]
+                    - generic [ref=f8e684]: 所有用例
+                  - generic [ref=f8e688] [cursor=pointer]:
+                    - img "delete-row" [ref=f8e690]
+                    - generic [ref=f8e693]: 无模块用例
+                  - generic [ref=f8e695]:
+                    - img "caret-down" [ref=f8e697] [cursor=pointer]
+                    - generic [ref=f8e700] [cursor=pointer]:
+                      - img "share-alt" [ref=f8e702]
+                      - generic [ref=f8e705]: gc
+            - generic [ref=f8e707]:
+              - generic [ref=f8e708]: 显示子模块用例
+              - switch [checked] [ref=f8e709] [cursor=pointer]
+          - generic [ref=f8e711]:
+            - generic [ref=f8e712]:
+              - generic [ref=f8e713]:
+                - generic [ref=f8e714] [cursor=pointer]:
+                  - checkbox "全选" [ref=f8e716]
+                  - generic [ref=f8e718]: 全选
+                - generic [ref=f8e719]:
+                  - button "caret-right 重新执行" [disabled]:
+                    - img "caret-right"
+                    - generic: 重新执行
+                - button "批量编辑 down" [disabled] [ref=f8e720]:
+                  - generic: 批量编辑
+                  - img "down"
+                - generic [ref=f8e722]:
+                  - textbox "搜索用例编号" [ref=f8e723]
+                  - button [ref=f8e725] [cursor=pointer]:
+                    - img "search" [ref=f8e726]
+                - generic [ref=f8e729]:
+                  - generic [ref=f8e730] [cursor=pointer]:
+                    - checkbox "执行" [checked] [ref=f8e732]
+                    - generic [ref=f8e734]: 执行
+                  - generic [ref=f8e735] [cursor=pointer]:
+                    - checkbox "成功" [checked] [ref=f8e737]
+                    - generic [ref=f8e739]: 成功
+                  - generic [ref=f8e740] [cursor=pointer]:
+                    - checkbox "失败" [checked] [ref=f8e742]
+                    - generic [ref=f8e744]: 失败
+                  - generic [ref=f8e745] [cursor=pointer]:
+                    - checkbox "未测" [checked] [ref=f8e747]
+                    - generic [ref=f8e749]: 未测
+                  - generic [ref=f8e750] [cursor=pointer]:
+                    - checkbox "未分析" [ref=f8e752]
+                    - generic [ref=f8e754]: 未分析
+                  - generic [ref=f8e755] [cursor=pointer]:
+                    - checkbox "无环境" [checked] [ref=f8e757]
+                    - generic [ref=f8e759]: 无环境
+                  - generic [ref=f8e760] [cursor=pointer]:
+                    - checkbox "跳过" [checked] [ref=f8e762]
+                    - generic [ref=f8e764]: 跳过
+              - generic [ref=f8e767] [cursor=pointer]:
+                - img "download" [ref=f8e768]
+                - text: 下载日志
+            - generic [ref=f8e772]:
+              - button "right HIMA3361-17399 hw用例增补：测试close blk的read disturb下fw能否正确处理 12时19分56秒 失败 UNC？ 赵辉" [ref=f8e774] [cursor=pointer]:
+                - img "right" [ref=f8e776]
+                - generic [ref=f8e779]:
+                  - checkbox [ref=f8e782]
+                  - generic [ref=f8e784]: HIMA3361-17399
+                  - generic [ref=f8e785]: hw用例增补：测试close blk的read disturb下fw能否正确处理
+                  - generic [ref=f8e786]: 12时19分56秒
+                  - generic [ref=f8e787]: 失败
+                  - combobox [ref=f8e793]
+                  - textbox "请输入具体原因" [ref=f8e796]: UNC？
+                  - textbox "请输入解决措施" [ref=f8e798]: 赵辉
+              - button "right HIMA3361-17400 hw用例增补：read disturb验证 1时38分52秒 失败 4k随机写时IO错误，xor打印 赵辉" [ref=f8e800] [cursor=pointer]:
+                - img "right" [ref=f8e802]
+                - generic [ref=f8e805]:
+                  - checkbox [ref=f8e808]
+                  - generic [ref=f8e810]: HIMA3361-17400
+                  - generic [ref=f8e811]: hw用例增补：read disturb验证
+                  - generic [ref=f8e812]: 1时38分52秒
+                  - generic [ref=f8e813]: 失败
+                  - combobox [expanded] [active] [ref=f8e819]:
+                    - listbox:
+                      - option "版本问题"
+                      - option "环境问题"
+                  - textbox "请输入具体原因" [ref=f8e822]: 4k随机写时IO错误，xor打印
+                  - textbox "请输入解决措施" [ref=f8e824]: 赵辉
+              - button "right HIMA3361-17401 hw用例增补：Tail Blk的read disturb测试 25时5分55秒 成功" [ref=f8e826] [cursor=pointer]:
+                - img "right" [ref=f8e828]
+                - generic [ref=f8e831]:
+                  - checkbox [ref=f8e834]
+                  - generic [ref=f8e836]: HIMA3361-17401
+                  - generic [ref=f8e837]: hw用例增补：Tail Blk的read disturb测试
+                  - generic [ref=f8e838]: 25时5分55秒
+                  - generic [ref=f8e839]: 成功
+            - generic [ref=f8e841]:
+              - generic [ref=f8e842]:
+                - text: "当前执行状态 :"
+                - generic [ref=f8e843]: 执行结束
+              - generic [ref=f8e844]: "用例总数: 3 / 成功: 1 / 失败: 2 / 跳过: 0 / 已完成失败原因分析: 0"
+  - generic [ref=f8e850]:
+    - generic [ref=f8e851] [cursor=pointer]: 版本问题
+    - generic [ref=f8e853] [cursor=pointer]: 环境问题
+    - generic [ref=f8e855] [cursor=pointer]: 框架问题
+    - generic [ref=f8e857] [cursor=pointer]: 用例问题
+    - generic [ref=f8e859] [cursor=pointer]: 脚本问题
+    - generic [ref=f8e861] [cursor=pointer]: 其他问题

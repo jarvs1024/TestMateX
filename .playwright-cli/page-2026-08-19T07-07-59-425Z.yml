@@ -1,0 +1,121 @@
+- generic [ref=f4e4]:
+  - complementary [ref=f4e5]:
+    - menu [ref=f4e7]:
+      - menuitem "home 首页" [ref=f4e8] [cursor=pointer]:
+        - img "home" [ref=f4e9]
+        - generic [ref=f4e12]: 首页
+      - menuitem "slack 需求管理" [ref=f4e13] [cursor=pointer]:
+        - img "slack" [ref=f4e14]
+        - generic [ref=f4e17]: 需求管理
+      - menuitem "code-sandbox 项目管理" [ref=f4e18] [cursor=pointer]:
+        - img "code-sandbox" [ref=f4e19]
+        - generic [ref=f4e22]: 项目管理
+      - menuitem "experiment 测试管理" [ref=f4e23] [cursor=pointer]:
+        - img "experiment" [ref=f4e24]
+        - generic [ref=f4e27]: 测试管理
+      - menuitem "bug 问题单管理" [ref=f4e28] [cursor=pointer]:
+        - img "bug" [ref=f4e29]
+        - generic [ref=f4e33]: 问题单管理
+      - menuitem "trophy 积分统计" [ref=f4e34] [cursor=pointer]:
+        - img "trophy" [ref=f4e35]
+        - generic [ref=f4e38]: 积分统计
+      - generic [ref=f4e39] [cursor=pointer]:
+        - img "history" [ref=f4e40]
+        - generic [ref=f4e43]: 自动化管理
+      - list [ref=f4e44]:
+        - menuitem "执行项目" [ref=f4e45] [cursor=pointer]
+        - menuitem "日志搜集系统" [ref=f4e47] [cursor=pointer]
+      - menuitem "history 兼容性配置管理" [ref=f4e49] [cursor=pointer]:
+        - img "history" [ref=f4e50]
+        - generic [ref=f4e53]: 兼容性配置管理
+      - menuitem "calendar 会议管理" [ref=f4e54] [cursor=pointer]:
+        - img "calendar" [ref=f4e55]
+        - generic [ref=f4e58]: 会议管理
+      - generic [ref=f4e59] [cursor=pointer]:
+        - img "appstore" [ref=f4e60]
+        - generic [ref=f4e63]: SSD环境管理
+      - generic [ref=f4e64] [cursor=pointer]:
+        - img "appstore" [ref=f4e65]
+        - generic [ref=f4e68]: CXL环境管理
+      - generic [ref=f4e69] [cursor=pointer]:
+        - img "line-chart" [ref=f4e70]
+        - generic [ref=f4e73]: 竞品分析
+      - generic [ref=f4e74] [cursor=pointer]:
+        - img "team" [ref=f4e75]
+        - generic [ref=f4e78]: 组织管理
+    - img "left" [ref=f4e80] [cursor=pointer]
+  - generic [ref=f4e83]:
+    - generic [ref=f4e85]:
+      - generic [ref=f4e86] [cursor=pointer]: 克江
+      - img "logo" [ref=f4e89]
+    - main [ref=f4e90]:
+      - generic [ref=f4e91]:
+        - generic [ref=f4e92]:
+          - generic [ref=f4e93]:
+            - generic [ref=f4e94]:
+              - generic [ref=f4e95] [cursor=pointer]:
+                - img "home" [ref=f4e96]
+                - text: 执行项目
+              - text: /
+            - generic [ref=f4e99]:
+              - generic [ref=f4e100] [cursor=pointer]: "3361"
+              - text: /
+            - generic [ref=f4e102]:
+              - generic [ref=f4e103] [cursor=pointer]: 3100debug
+              - img "down" [ref=f4e104]
+          - menu [ref=f4e107]:
+            - menuitem "关联用例" [ref=f4e108] [cursor=pointer]
+            - menuitem "关联SSD&CXL" [ref=f4e110] [cursor=pointer]
+            - menuitem "关联Switch" [ref=f4e112] [cursor=pointer]
+            - menuitem "关联主机" [ref=f4e114] [cursor=pointer]
+            - menuitem "执行详情" [ref=f4e116] [cursor=pointer]
+        - generic [ref=f4e127]:
+          - generic [ref=f4e128]:
+            - generic [ref=f4e130]:
+              - textbox "请输入" [ref=f4e131]
+              - button [ref=f4e133] [cursor=pointer]:
+                - img "search" [ref=f4e134]
+            - button "批量删除" [disabled] [ref=f4e137]
+          - generic [ref=f4e139]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - table:
+                      - rowgroup:
+                        - row "执行名称 执行人 filter 开始时间 结束时间 执行总时间 caret-up caret-down 执行情况 filter 操作":
+                          - columnheader:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - checkbox [disabled]
+                          - columnheader "执行名称"
+                          - columnheader "执行人 filter":
+                            - generic:
+                              - generic: 执行人
+                              - button "filter":
+                                - img "filter"
+                          - columnheader "开始时间"
+                          - columnheader "结束时间"
+                          - columnheader "执行总时间 caret-up caret-down":
+                            - generic:
+                              - generic: 执行总时间
+                              - generic:
+                                - generic:
+                                  - img "caret-up"
+                                  - img "caret-down"
+                          - columnheader "执行情况 filter":
+                            - generic:
+                              - generic: 执行情况
+                              - button "filter":
+                                - img "filter"
+                          - columnheader "操作"
+                          - columnheader
+                  - generic:
+                    - table:
+                      - rowgroup:
+                        - row "暂无数据":
+                          - cell "暂无数据":
+                            - generic:
+                              - generic:
+                                - paragraph: 暂无数据

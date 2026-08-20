@@ -1,0 +1,105 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - menu [ref=f1e7]:
+      - menuitem "home 首页" [ref=f1e8] [cursor=pointer]:
+        - img "home" [ref=f1e9]
+        - generic [ref=f1e12]: 首页
+      - menuitem "slack 需求管理" [ref=f1e13] [cursor=pointer]:
+        - img "slack" [ref=f1e14]
+        - generic [ref=f1e17]: 需求管理
+      - menuitem "code-sandbox 项目管理" [ref=f1e18] [cursor=pointer]:
+        - img "code-sandbox" [ref=f1e19]
+        - generic [ref=f1e22]: 项目管理
+      - menuitem "experiment 测试管理" [ref=f1e23] [cursor=pointer]:
+        - img "experiment" [ref=f1e24]
+        - generic [ref=f1e27]: 测试管理
+      - menuitem "bug 问题单管理" [ref=f1e28] [cursor=pointer]:
+        - img "bug" [ref=f1e29]
+        - generic [ref=f1e33]: 问题单管理
+      - menuitem "trophy 积分统计" [ref=f1e34] [cursor=pointer]:
+        - img "trophy" [ref=f1e35]
+        - generic [ref=f1e38]: 积分统计
+      - generic [ref=f1e39] [cursor=pointer]:
+        - img "history" [ref=f1e40]
+        - generic [ref=f1e43]: 自动化管理
+      - menuitem "history 兼容性配置管理" [ref=f1e44] [cursor=pointer]:
+        - img "history" [ref=f1e45]
+        - generic [ref=f1e48]: 兼容性配置管理
+      - menuitem "calendar 会议管理" [ref=f1e49] [cursor=pointer]:
+        - img "calendar" [ref=f1e50]
+        - generic [ref=f1e53]: 会议管理
+      - generic [ref=f1e54] [cursor=pointer]:
+        - img "appstore" [ref=f1e55]
+        - generic [ref=f1e58]: SSD环境管理
+      - generic [ref=f1e59] [cursor=pointer]:
+        - img "appstore" [ref=f1e60]
+        - generic [ref=f1e63]: CXL环境管理
+      - generic [ref=f1e64] [cursor=pointer]:
+        - img "line-chart" [ref=f1e65]
+        - generic [ref=f1e68]: 竞品分析
+      - generic [ref=f1e69] [cursor=pointer]:
+        - img "team" [ref=f1e70]
+        - generic [ref=f1e73]: 组织管理
+    - img "left" [ref=f1e75] [cursor=pointer]
+  - generic [ref=f1e78]:
+    - generic [ref=f1e79]:
+      - generic [ref=f1e80]: 首页
+      - generic [ref=f1e81]:
+        - generic [ref=f1e82] [cursor=pointer]: 克江
+        - img "logo" [ref=f1e85]
+    - main [ref=f1e86]:
+      - generic [ref=f1e87]:
+        - generic [ref=f1e88]:
+          - generic [ref=f1e89]: 项目列表
+          - generic [ref=f1e95]:
+            - generic [ref=f1e96]: 共2个项目
+            - table [ref=f1e104]:
+              - rowgroup [ref=f1e109]:
+                - row [ref=f1e110] [cursor=pointer]:
+                  - cell "Hima 3361 V100芯片解决方案项目" [ref=f1e111]
+                  - cell "家明 陈家明" [ref=f1e113]:
+                    - generic [ref=f1e114]:
+                      - generic [ref=f1e115]: 家明
+                      - generic [ref=f1e117]: 陈家明
+                  - cell "未开始" [ref=f1e118]
+                - row [ref=f1e120] [cursor=pointer]:
+                  - cell "S3100" [ref=f1e121]
+                  - cell "家明 陈家明" [ref=f1e123]:
+                    - generic [ref=f1e124]:
+                      - generic [ref=f1e125]: 家明
+                      - generic [ref=f1e127]: 陈家明
+                  - cell "未开始" [ref=f1e128]
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: 需求列表
+          - generic [ref=f1e136]:
+            - generic:
+              - generic: 共0个需求
+              - generic:
+                - generic:
+                  - paragraph: 暂无数据
+        - generic [ref=f1e143]:
+          - generic [ref=f1e144]: 版本列表
+          - generic [ref=f1e149]:
+            - generic:
+              - generic: 共0个版本
+              - generic:
+                - generic:
+                  - paragraph: 暂无数据
+        - generic [ref=f1e156]:
+          - generic [ref=f1e157]: 迭代列表
+          - generic [ref=f1e162]:
+            - generic:
+              - generic: 共0个迭代
+              - generic:
+                - generic:
+                  - paragraph: 暂无数据
+        - generic [ref=f1e169]:
+          - generic [ref=f1e170]: 用例列表
+          - generic [ref=f1e176]:
+            - generic [ref=f1e177]: 共0个用例
+            - paragraph [ref=f1e187]: 暂无数据
+        - generic [ref=f1e188]:
+          - generic [ref=f1e189]: 问题单列表
+          - generic [ref=f1e195]:
+            - generic [ref=f1e196]: 共0个问题单
+            - paragraph [ref=f1e206]: 暂无数据

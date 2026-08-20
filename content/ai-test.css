@@ -1,0 +1,41 @@
+/* content/ai-test.css */
+
+.testmatex-floating-btn {
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 80px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 18px !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 28px !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.testmatex-floating-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5), 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.testmatex-floating-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+
+.testmatex-floating-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
+
+.testmatex-icon {
+  font-size: 16px !important;
+  line-height: 1 !important;
+}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>TestMateX</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- 紫色品牌区 (固定) -->
+    <header class="topbar">
+      <div class="brand-row">
+        <span class="brand-logo">&#x1F680;</span>
+        <span class="brand-title">TestMateX</span>
+        <span class="brand-sub" id="brand-sub">AiTest 至 PingCode</span>
+      </div>
+      <!-- 状态行 -->
+      <div class="status-rows">
+        <div class="status-row">
+          <span class="status-dot" id="aitest-dot"></span>
+          <span class="status-label">AiTest</span>
+          <span class="status-value" id="aitest-status">未检测</span>
+          <button class="status-btn" id="btn-reconnect" title="重连">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M13.5 8C13.5 10.4853 11.4853 12.5 9 12.5C6.51472 12.5 4.5 10.4853 4.5 8C4.5 5.51472 6.51472 3.5 9 3.5C10.5 3.5 11.8 4.2 12.6 5.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 2.5V5.5H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            重连
+          </button>
+        </div>
+        <div class="status-row">
+          <span class="status-dot" id="pingcode-dot"></span>
+          <span class="status-label">PingCode</span>
+          <span class="status-value" id="pingcode-status">未连接</span>
+          <button class="status-btn" id="btn-reauth" title="重新鉴权">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 3H13C13.5523 3 14 3.44772 14 4V12C14 12.5523 13.5523 13 13 13H3C2.44772 13 2 12.5523 2 12V4C2 3.44772 2.44772 3 3 3H6L8 1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 7V10M8 11.5V11.51" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            重鉴
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 面包屑 (浅色) -->
+    <div class="breadcrumb">
+      <select id="project-select" class="bc-select"></select>
+      <span class="bc-sep">&#8250;</span>
+      <select id="task-select" class="bc-select"></select>
+      <span class="bc-sep">&#8250;</span>
+      <select id="exec-select" class="bc-select"></select>
+      <button class="bc-btn icon-btn" id="btn-pick-library" title="刷新项目">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.5 8C13.5 10.4853 11.4853 12.5 9 12.5C6.51472 12.5 4.5 10.4853 4.5 8C4.5 5.51472 6.51472 3.5 9 3.5C10.5 3.5 11.8 4.2 12.6 5.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M12 2.5V5.5H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 主页 -->
+    <section id="page-list" class="page active">
+      <div class="page-header">
+        <span class="page-title">失败用例</span>
+        <span class="page-meta" id="list-summary">未扫描</span>
+        <div class="page-actions">
+          <label class="check-label">
+            <input type="checkbox" id="check-all" /> 全选
+          </label>
+          <button class="btn btn-small btn-primary" id="btn-scan">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            扫描
+          </button>
+        </div>
+      </div>
+      <div id="cases-list" class="cases-list">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>在 AiTest 任务详情页打开后,点击 [扫描]</p>
+        </div>
+      </div>
+      <div class="action-bar-fixed">
+        <button class="btn btn-primary" id="btn-submit-selected" disabled>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1L10.5 5.5L15 6.5L11.5 9.5L12.5 14L8 11.5L3.5 14L4.5 9.5L1 6.5L5.5 5.5L8 1Z" fill="currentColor"/></svg>
+          提交到 PingCode (<span id="submit-count">0</span>)
+        </button>
+        <button class="btn btn-secondary" id="btn-ai-batch">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1L9.5 5L13 3L11 7L15 8L11 9L13 13L9.5 11L8 15L6.5 11L3 13L5 9L1 8L5 7L3 3L6.5 5L8 1Z" fill="currentColor" opacity="0.8"/></svg>
+          AI 分析
+        </button>
+      </div>
+    </section>
+
+    <!-- 编辑页 -->
+    <section id="page-edit" class="page">
+      <div class="page-header">
+        <span class="page-title">提单 (<span id="edit-count">0</span>)</span>
+      </div>
+      <div class="edit-content">
+        <div class="edit-section">
+          <div class="edit-section-title">已选用例</div>
+          <div id="edit-cases-list" class="edit-cases-list"></div>
+          <div class="edit-row">
+            <label>模板</label>
+            <select id="edit-template" class="filter-select">
+              <option>S3100V1R1 缺陷</option>
+            </select>
+          </div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title required">BUG 标题</div>
+          <div class="edit-row">
+            <label>阶段</label>
+            <select id="edit-stage" class="filter-select">
+              <option>100%网表前</option>
+              <option>TO前</option>
+              <option selected>回片后</option>
+              <option>产品化-TR4</option>
+              <option>产品化-TR4A</option>
+              <option>产品化-TR5</option>
+              <option>产品化-TR6</option>
+              <option>产品化-TR6后</option>
+            </select>
+          </div>
+          <input id="edit-title" class="edit-input-full" type="text" />
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">1. 问题描述</div>
+          <div class="edit-row"><label>测试特性/模块</label><input id="f-featureModule" type="text" /></div>
+          <div class="edit-row"><label>预置条件</label><textarea id="f-preconditions" rows="2"></textarea></div>
+          <div class="edit-row required"><label>关键操作步骤</label><textarea id="f-steps" rows="2"></textarea></div>
+          <div class="edit-row"><label>预期效果</label><textarea id="f-expectedResult" rows="2"></textarea></div>
+          <div class="edit-row required"><label>测试失败现象</label><textarea id="f-failurePhenomenon" rows="3"></textarea></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">2. 测试环境</div>
+          <div class="edit-row required"><label>主机 IP/主机名</label><input id="f-hostIp" type="text" /></div>
+          <div class="edit-row"><label>主机 SN</label><input id="f-hostSn" type="text" /></div>
+          <div class="edit-row"><label>主机 OS</label><input id="f-hostOs" type="text" /></div>
+          <div class="edit-row"><label>SSD 数量及连接</label><input id="f-hostSsdTopology" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">3. 版本信息</div>
+          <div class="edit-row"><label>FPGA</label><input id="f-fpgaVersion" type="text" /></div>
+          <div class="edit-row"><label>FW</label><input id="f-fwVersion" type="text" /></div>
+          <div class="edit-row"><label>驱动</label><input id="f-driverVersion" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">4. 测试仪器</div>
+          <div class="edit-row"><label>仪器名称</label><input id="f-instrumentName" type="text" /></div>
+          <div class="edit-row"><label>IP/SN</label><input id="f-instrumentIpSn" type="text" /></div>
+          <div class="edit-row"><label>软件版本</label><input id="f-instrumentVersion" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">5. 软件工具</div>
+          <div class="edit-row"><label>工具及版本</label><input id="f-softwareTools" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">6. 被测设备(盘片)</div>
+          <div class="edit-row"><label>硬件版本</label><input id="f-hwVersion" type="text" /></div>
+          <div class="edit-row"><label>固件版本</label><input id="f-dutFwVersion" type="text" /></div>
+          <div class="edit-row"><label>SN</label><input id="f-dutSn" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">7. 测试用例信息</div>
+          <div class="edit-row required"><label>用例编号</label><input id="f-caseId" type="text" /></div>
+          <div class="edit-row"><label>脚本编号/版本</label><input id="f-scriptInfo" type="text" /></div>
+          <div class="edit-row"><label>仓库信息</label><input id="f-scriptRepo" type="text" /></div>
+          <div class="edit-row"><label>修改记录</label><input id="f-scriptModifications" type="text" /></div>
+          <div class="edit-row"><label>日志直达链接</label><input id="f-logUrl" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">8. 定位履历</div>
+          <div class="edit-row"><textarea id="f-analysisTrace" rows="3" placeholder="关键定位信息"></textarea></div>
+          <div class="edit-row"><label>贴图</label><input id="f-analysisTraceImages" type="text" placeholder="URL 或 [上传]" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">9. 初步分析结论</div>
+          <div class="edit-row"><label>分析人</label><input id="f-analyzer" type="text" /></div>
+          <div class="edit-row"><label>初步原因</label><textarea id="f-initialReason" rows="2"></textarea></div>
+          <div class="edit-row"><label>问题发生时间</label><input id="f-occurTime" type="text" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">10. 测试日志</div>
+          <div class="edit-row"><label>串口日志</label><input id="f-logSerial" type="text" /></div>
+          <div class="edit-row"><label>训练器 Trace</label><input id="f-logTrace" type="text" /></div>
+          <div class="edit-row"><label>操作系统日志</label><input id="f-logOs" type="text" /></div>
+          <div class="edit-row"><label>测试工具输出</label><input id="f-logTool" type="text" /></div>
+          <div class="edit-row"><label>贴图</label><input id="f-logImages" type="text" placeholder="URL 或 [上传]" /></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">11. 其他补充信息</div>
+          <div class="edit-row"><textarea id="f-otherInfo" rows="4" placeholder="提单者自由补充 (选填)"></textarea></div>
+        </div>
+        <div class="edit-section">
+          <div class="edit-section-title">AI 摘要</div>
+          <div id="edit-ai-summary" class="edit-ai-summary"><p class="text-muted">从主页 AI 分析带入</p></div>
+        </div>
+      </div>
+      <div class="action-bar-fixed">
+        <button class="btn btn-secondary" id="btn-edit-back-2">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          返回
+        </button>
+        <button class="btn btn-secondary" id="btn-edit-preview-2">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          预览
+        </button>
+        <button class="btn btn-primary" id="btn-edit-submit-2">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          提交 (<span id="edit-count-2">0</span>)
+        </button>
+      </div>
+    </section>
+
+    <!-- 预览页 -->
+    <section id="page-preview" class="page">
+      <div class="page-header">
+        <span class="page-title">预览</span>
+      </div>
+      <div class="preview-content">
+        <div class="preview-header">
+          <h2 id="pv-title">-</h2>
+          <div class="preview-meta">
+            <span>阶段: <strong id="pv-stage">-</strong></span>
+            <span>项目: <strong>S3100V1R1</strong></span>
+          </div>
+        </div>
+        <div id="preview-body" class="preview-body"></div>
+      </div>
+      <div class="action-bar-fixed">
+        <button class="btn btn-secondary" id="btn-preview-back-2">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          返回
+        </button>
+        <button class="btn btn-primary" id="btn-preview-submit-2">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          提交 (<span id="preview-count-2">0</span>)
+        </button>
+      </div>
+    </section>
+
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

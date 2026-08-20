@@ -1,0 +1,8 @@
+[     207ms] [LOG] [vite] connecting... @ http://10.20.65.23:3000/@vite/client:183
+[     491ms] [LOG] [vite] connected. @ http://10.20.65.23:3000/@vite/client:211
+[    4025ms] [WARNING] Feature flag __VUE_PROD_HYDRATION_MISMATCH_DETAILS__ is not explicitly defined. You are running the esm-bundler build of Vue, which expects these compile-time feature flags to be globally injected via the bundler config in order to get better tree-shaking in the production bundle.
+
+For more details, see https://link.vuejs.org/feature-flags. @ http://10.20.65.23:3000/node_modules/.vite/deps/chunk-RFSKQV6Q.js?v=914d2da0:6514
+[    4217ms] [LOG] {} @ http://10.20.65.23:3000/src/axios/index.js:111
+[    4242ms] [LOG] {} @ http://10.20.65.23:3000/src/axios/index.js:111
+[    4363ms] [LOG] {} @ http://10.20.65.23:3000/src/axios/index.js:111

@@ -1,0 +1,148 @@
+- generic [ref=f6e1]:
+  - generic [ref=f6e4]:
+    - complementary [ref=f6e5]:
+      - menu [ref=f6e7]:
+        - menuitem "home 首页" [ref=f6e8] [cursor=pointer]:
+          - img "home" [ref=f6e9]
+          - generic [ref=f6e12]: 首页
+        - menuitem "slack 需求管理" [ref=f6e13] [cursor=pointer]:
+          - img "slack" [ref=f6e14]
+          - generic [ref=f6e17]: 需求管理
+        - menuitem "code-sandbox 项目管理" [ref=f6e18] [cursor=pointer]:
+          - img "code-sandbox" [ref=f6e19]
+          - generic [ref=f6e22]: 项目管理
+        - menuitem "experiment 测试管理" [ref=f6e23] [cursor=pointer]:
+          - img "experiment" [ref=f6e24]
+          - generic [ref=f6e27]: 测试管理
+        - menuitem "bug 问题单管理" [ref=f6e28] [cursor=pointer]:
+          - img "bug" [ref=f6e29]
+          - generic [ref=f6e33]: 问题单管理
+        - menuitem "trophy 积分统计" [ref=f6e34] [cursor=pointer]:
+          - img "trophy" [ref=f6e35]
+          - generic [ref=f6e38]: 积分统计
+        - generic [ref=f6e39] [cursor=pointer]:
+          - img "history" [ref=f6e40]
+          - generic [ref=f6e43]: 自动化管理
+        - list [ref=f6e44]:
+          - menuitem "执行项目" [ref=f6e45] [cursor=pointer]
+          - menuitem "日志搜集系统" [ref=f6e47] [cursor=pointer]
+        - menuitem "history 兼容性配置管理" [ref=f6e49] [cursor=pointer]:
+          - img "history" [ref=f6e50]
+          - generic [ref=f6e53]: 兼容性配置管理
+        - menuitem "calendar 会议管理" [ref=f6e54] [cursor=pointer]:
+          - img "calendar" [ref=f6e55]
+          - generic [ref=f6e58]: 会议管理
+        - generic [ref=f6e59] [cursor=pointer]:
+          - img "appstore" [ref=f6e60]
+          - generic [ref=f6e63]: SSD环境管理
+        - generic [ref=f6e64] [cursor=pointer]:
+          - img "appstore" [ref=f6e65]
+          - generic [ref=f6e68]: CXL环境管理
+        - generic [ref=f6e69] [cursor=pointer]:
+          - img "line-chart" [ref=f6e70]
+          - generic [ref=f6e73]: 竞品分析
+        - generic [ref=f6e74] [cursor=pointer]:
+          - img "team" [ref=f6e75]
+          - generic [ref=f6e78]: 组织管理
+      - img "left" [ref=f6e80] [cursor=pointer]
+    - generic [ref=f6e83]:
+      - generic [ref=f6e85]:
+        - generic [ref=f6e86] [cursor=pointer]: 克江
+        - img "logo" [ref=f6e89]
+      - main [ref=f6e90]:
+        - generic [ref=f6e91]:
+          - generic [ref=f6e92]:
+            - generic [ref=f6e93]:
+              - generic [ref=f6e94]:
+                - generic [ref=f6e95] [cursor=pointer]:
+                  - img "home" [ref=f6e96]
+                  - text: 执行项目
+                - text: /
+              - generic [ref=f6e99]:
+                - generic [ref=f6e100] [cursor=pointer]: "3361"
+                - text: /
+              - generic [ref=f6e102]:
+                - generic [ref=f6e103] [cursor=pointer]: 断链问题测试
+                - img "down" [ref=f6e104]
+            - menu [ref=f6e107]:
+              - menuitem "关联用例" [ref=f6e108] [cursor=pointer]
+              - menuitem "关联SSD&CXL" [ref=f6e110] [cursor=pointer]
+              - menuitem "关联Switch" [ref=f6e112] [cursor=pointer]
+              - menuitem "关联主机" [ref=f6e114] [cursor=pointer]
+              - menuitem "执行详情" [ref=f6e116] [cursor=pointer]
+          - generic [ref=f6e129]:
+            - generic [ref=f6e130]:
+              - generic [ref=f6e132]:
+                - textbox "请输入" [ref=f6e133]
+                - button [ref=f6e135] [cursor=pointer]:
+                  - img "search" [ref=f6e136]
+              - button "批量删除" [disabled] [ref=f6e139]
+            - generic [ref=f6e142]:
+              - generic [ref=f6e144]:
+                - table [ref=f6e146]:
+                  - rowgroup [ref=f6e157]:
+                    - row "执行名称 执行人 filter 开始时间 结束时间 执行总时间 caret-up caret-down 执行情况 filter 操作" [ref=f6e158]:
+                      - columnheader [ref=f6e159]:
+                        - checkbox [ref=f6e163] [cursor=pointer]
+                      - columnheader "执行名称" [ref=f6e165]
+                      - columnheader "执行人 filter" [ref=f6e166]:
+                        - generic [ref=f6e167]:
+                          - generic [ref=f6e168]: 执行人
+                          - button [ref=f6e169] [cursor=pointer]:
+                            - img "filter" [ref=f6e170]
+                      - columnheader "开始时间" [ref=f6e173]
+                      - columnheader "结束时间" [ref=f6e174]
+                      - columnheader "执行总时间 caret-up caret-down" [ref=f6e175] [cursor=pointer]:
+                        - generic [ref=f6e176]:
+                          - generic [ref=f6e177]: 执行总时间
+                          - generic [ref=f6e179]:
+                            - img "caret-up" [ref=f6e180]
+                            - img "caret-down" [ref=f6e183]
+                      - columnheader "执行情况 filter" [ref=f6e186]:
+                        - generic [ref=f6e187]:
+                          - generic [ref=f6e188]: 执行情况
+                          - button [ref=f6e189] [cursor=pointer]:
+                            - img "filter" [ref=f6e190]
+                      - columnheader "操作" [ref=f6e193]
+                      - columnheader [ref=f6e194]
+                - table [ref=f6e196]:
+                  - rowgroup [ref=f6e206]:
+                    - row "sata命令测试_202606021150 海东 金海东 2026-06-02 11:50:32 2026-06-02 11:54:19 0时3分47秒 执行异常 pause caret-right file-sync download mail delete" [ref=f6e207]:
+                      - cell [ref=f6e208]:
+                        - checkbox [ref=f6e211] [cursor=pointer]
+                      - cell "sata命令测试_202606021150" [ref=f6e213]
+                      - cell "海东 金海东" [ref=f6e215]:
+                        - generic [ref=f6e216]:
+                          - generic [ref=f6e217]: 海东
+                          - generic [ref=f6e219]: 金海东
+                      - cell "2026-06-02 11:50:32" [ref=f6e220]
+                      - cell "2026-06-02 11:54:19" [ref=f6e221]
+                      - cell "0时3分47秒" [ref=f6e222]
+                      - cell "执行异常" [ref=f6e223]
+                      - cell [ref=f6e225]:
+                        - generic [ref=f6e226]:
+                          - img "pause" [ref=f6e227]
+                          - img "caret-right" [active] [ref=f6e231] [cursor=pointer]
+                          - img "file-sync" [ref=f6e234] [cursor=pointer]
+                          - img "download" [ref=f6e237] [cursor=pointer]
+                          - img "mail" [ref=f6e240] [cursor=pointer]
+                          - img "delete" [ref=f6e243] [cursor=pointer]
+              - list [ref=f6e246]:
+                - listitem [ref=f6e247]: 共 1 条
+                - listitem "上一页" [ref=f6e248]:
+                  - button [disabled] [ref=f6e249]:
+                    - img "left" [ref=f6e250]
+                - listitem "1" [ref=f6e253] [cursor=pointer]
+                - listitem "下一页" [ref=f6e255]:
+                  - button [disabled] [ref=f6e256]:
+                    - img "right" [ref=f6e257]
+                - listitem [ref=f6e260]:
+                  - generic [ref=f6e262] [cursor=pointer]:
+                    - combobox [ref=f6e264]
+                    - generic [ref=f6e265]: 10 条/页
+  - tooltip "确认执行名称 sata命令测试_202606021150_rerun 确 定" [ref=f6e269]:
+    - generic [ref=f6e270]: 确认执行名称
+    - generic [ref=f6e271]:
+      - textbox [ref=f6e272]: sata命令测试_202606021150_rerun
+      - button "确 定" [ref=f6e273] [cursor=pointer]
+  - tooltip "重新执行" [ref=f6e278]

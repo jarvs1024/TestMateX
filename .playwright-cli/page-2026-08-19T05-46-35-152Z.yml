@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: AiTest管理平台
+    - generic [ref=e6]:
+      - generic [ref=e7]: Login
+      - generic [ref=e8]:
+        - img "user" [ref=e11]
+        - textbox "Username" [ref=e14]
+      - generic [ref=e15]:
+        - img "lock" [ref=e18]
+        - textbox "Password" [ref=e21]
+      - button "立即登录" [ref=e22] [cursor=pointer]
+  - generic [ref=e25]:
+    - img "close-circle" [ref=e26]
+    - text: 登录状态已失效，请重新登陆
