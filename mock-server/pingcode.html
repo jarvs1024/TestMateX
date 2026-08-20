@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock PingCode - 已登录</title>
+  <link rel="stylesheet" href="/static/css/mock.css">
+</head>
+<body>
+  <header class="top-nav">
+    <span class="logo">🧪 Mock PingCode</span>
+    <nav>
+      <a href="/index.html">Mock AiTest</a>
+      <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">任务详情</a>
+      <a href="/pingcode.html" class="active">PingCode</a>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <span class="ant-breadcrumb-item">首页</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">问题单管理</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">已登录态</span>
+  </div>
+
+  <main class="content">
+    <div class="mock-banner">
+      <strong>🔐 Mock PingCode</strong> — 这是一个静态 "已登录" 页面。
+      在 <code>ENV=prod</code> 模式下, <code>content/pingcode-bridge.js</code> 会通过这里的 fetch 拿 JWT;
+      在 <code>ENV=mock</code> 模式下, sw.js 直接返回伪造 JWT, 不会真正调用这个页面。
+    </div>
+
+    <section class="card">
+      <h2>当前登录态</h2>
+      <div class="kv-grid">
+        <div class="k">用户名</div><div class="v" style="color:#52c41a;font-weight:600;">Mock 测试员</div>
+        <div class="k">User ID</div><div class="v">mock-user-id</div>
+        <div class="k">所属项目</div><div class="v">S3100V1R1</div>
+        <div class="k">JWT (伪造)</div><div class="v" style="font-family:monospace;font-size:12px;">eyJhbGciOiJIUzI1NiJ9.MOCK_TOKEN.mock_signature</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Mock 工单列表 (返回给插件的示例数据)</h2>
+      <table class="ant-table">
+        <thead>
+          <tr>
+            <th>工单号</th>
+            <th>标题</th>
+            <th>状态</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ant-table-row" data-row-key="1000">
+            <td><a href="/mock-pingcode/bug/1000">S3100V1R1-1000</a></td>
+            <td>【测试】【阶段:回片后】PCIE_GEN4_LINK_TRAIN_001 PCIe Gen4 x4 链路训练</td>
+            <td><span class="status-tag fail">待修复</span></td>
+            <td>Mock 测试员</td>
+            <td>2026-08-19 14:30:00</td>
+          </tr>
+          <tr class="ant-table-row" data-row-key="1023">
+            <td><a href="/mock-pingcode/bug/1023">S3100V1R1-1023</a></td>
+            <td>【测试】【阶段:回片后】NVMe 兼容性回归 #001</td>
+            <td><span class="status-tag pass">已关闭</span></td>
+            <td>Mock 测试员</td>
+            <td>2026-08-18 16:00:00</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

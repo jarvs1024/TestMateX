@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock AiTest - 任务详情 #9999</title>
+  <link rel="stylesheet" href="/static/css/mock.css">
+</head>
+<body>
+  <header class="top-nav">
+    <span class="logo">🧪 Mock AiTest</span>
+    <nav>
+      <a href="/Dml/AiTest/index/automationManage-library">项目列表 (library)</a>
+      <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999" class="active">任务详情 (taskDetail)</a>
+      <a href="/pingcode.html">PingCode</a>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <span class="ant-breadcrumb-item">首页</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-item">执行项目</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">S3100V1R1 性能回归</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">PCIE 链路训练稳定性</span>
+  </div>
+
+  <main class="content">
+    <div class="mock-banner">
+      <strong>🎯 taskDetail 页</strong> — 这是插件主流程入口。
+      右下角浮动按钮 🚀 由 <code>content/ai-test-extractor.js</code> 注入 (URL 含 <code>/Dml/AiTest/</code> 触发)。
+      <br>点击后: <code>extractFailureCase()</code> → 走 mock 数据 (默认) 或 DOM 抓取 (ENV=prod)。
+    </div>
+
+    <section class="card">
+      <h2>任务基本信息</h2>
+      <div class="kv-grid">
+        <div class="k">任务 ID</div><div class="v" id="task-id">9999</div>
+        <div class="k">任务名</div><div class="v">S3100V1R1 PCIE 链路训练稳定性</div>
+        <div class="k">所属计划</div><div class="v">PCIE_GEN4_LINK_TRAIN</div>
+        <div class="k">创建人</div><div class="v">mock_user</div>
+        <div class="k">创建时间</div><div class="v">2026-08-19 14:00:00</div>
+        <div class="k">失败用例数</div><div class="v" style="color:#f5222d;font-weight:600;">3</div>
+        <div class="k">DUT SN</div><div class="v dut-sn">SN-DEMINGLI-SSD-001</div>
+        <div class="k">阶段</div><div class="v">回片后</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>失败执行记录 (本次有 2 个失败 exec)</h2>
+      <div class="meta">点击查看详情或点击右下角浮动按钮一键提单</div>
+      <table class="ant-table">
+        <thead>
+          <tr>
+            <th>Exec ID</th>
+            <th>执行名</th>
+            <th>执行人</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>耗时 (s)</th>
+            <th>结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ant-table-row" data-row-key="88001201">
+            <td>88001201</td>
+            <td>PCIE 链路训练 - 第 1 次</td>
+            <td>mock_user</td>
+            <td>2026-08-19 14:23:11</td>
+            <td>2026-08-19 18:47:55</td>
+            <td>15884</td>
+            <td><span class="status-tag fail">失败</span></td>
+          </tr>
+          <tr class="ant-table-row" data-row-key="88001202">
+            <td>88001202</td>
+            <td>PCIE 链路训练 - 第 2 次</td>
+            <td>mock_user</td>
+            <td>2026-08-18 09:00:00</td>
+            <td>2026-08-18 12:30:00</td>
+            <td>12600</td>
+            <td><span class="status-tag fail">失败</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>本次失败的用例 (exec 88001201)</h2>
+      <table class="ant-table">
+        <thead>
+          <tr>
+            <th>用例编号</th>
+            <th>用例名称</th>
+            <th>失败分析</th>
+            <th>初步根因</th>
+            <th>建议复测</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ant-table-row" data-row-key="88481201">
+            <td>PCIE_GEN4_LINK_TRAIN_001</td>
+            <td>PCIe Gen4 x4 链路训练稳定性测试</td>
+            <td>5000 次 LTSSM 切换中, Polling.Active → Polling.Config 失败 3 次, 链路降速到 Gen3</td>
+            <td>PHY PLL 锁定抖动</td>
+            <td>复测 3 次, 每次间隔 30s, 抓训练器 Trace + 串口日志</td>
+          </tr>
+          <tr class="ant-table-row" data-row-key="88481202">
+            <td>PCIE_GEN4_LINK_TRAIN_002</td>
+            <td>PCIe Gen4 x4 ASPM L1 进出</td>
+            <td>L1 进入后唤醒失败, 设备停留在 D3hot</td>
+            <td>ASPM 协商超时</td>
+            <td>复测 5 次, 检查 PM 状态机</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 浮动提单按钮由 content/ai-test-extractor.js 注入 -->
+  </main>
+</body>
+</html>

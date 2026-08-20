@@ -3,7 +3,79 @@
   if (window.__testmatex_injected) return;
   window.__testmatex_injected = true;
   const AITEST_BASE = 'http://10.20.65.23:3000';
+
+  // ─── ENV 读取 (content script 上下文) ───
+  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+    ENV: 'mock',
+    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
+    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+  };
+  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+  function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
+
+  // ─── Mock 数据源 ───
+  const MOCK_TASK_ID = 9999;
+  const MOCK_PROJECT_NAME = 'S3100V1R1 性能回归';
+  const MOCK_FULL_CASE = {
+    wid: 88481201,
+    testcase_number: 'PCIE_GEN4_LINK_TRAIN_001',
+    testcase_name: 'PCIe Gen4 x4 链路训练稳定性测试',
+    failanany: '执行 PCIe Gen4 x4 链路训练时, 在 5000 次 LTSSM 切换循环中, Polling.Active → Polling.Config 转换失败 3 次, 链路降速到 Gen3',
+    failroot: '训练器 LTSSM 状态机在 Polling.Compliance 阶段超时, 推测为 PHY PLL 锁定抖动',
+    solution: '复测 3 次, 每次间隔 30s, 抓训练器 Trace + 串口日志',
+    execStartTime: '2026-08-19T14:23:11',
+    execFinishTime: '2026-08-19T18:47:55',
+    execTotalTime: 15884,
+    logText: '[14:23:11.234] [BOOT] FW version: S3100V1R1B01\n[14:23:12.001] [PCIE] Link training start, target Gen4 x4\n[14:23:15.887] [PCIE] LTSSM: Detect -> Polling.Active\n[14:23:18.022] [PCIE] Polling.Compliance timeout (>2s)\n[14:23:20.445] [PCIE] Fallback to Gen3 x4\n[14:47:55.000] [TEST] FAIL: Link instability observed (3/5000 events)\n[14:47:55.001] [EXIT] code=3',
+    logTextIps: ['10.20.65.23', '192.168.10.55'],
+  };
   const AITEST_API = AITEST_BASE + '/api/automation';
+  function mockAiTestApi(endpoint, body) {
+    console.log('[TestMateX MOCK] aiTestApi', endpoint, body || '');
+    const e = endpoint.replace(/^\//, '');
+    if (e === 'getExecProjectList') {
+      return { code: 200, data: { project_list: [
+        { projectName: MOCK_PROJECT_NAME, type: 1, taskCount: 8, latestUpdate: '2026-08-19 18:48:00' },
+        { projectName: 'S3100V1R1 兼容性',     type: 2, taskCount: 12, latestUpdate: '2026-08-18 11:20:00' },
+      ] } };
+    }
+    if (e === 'getLibraryTaskPage' || e === 'getTaskListPage') {
+      const page = (body && body.page) || 1;
+      return { code: 200, data: { rows: [
+        { wid: MOCK_TASK_ID, name: 'S3100V1R1 PCIE 回归任务', planName: 'PCIE_GEN4_LINK_TRAIN', executorName: 'mock_user', failNum: 3, createDate: '2026-08-19T14:00:00', status: 3 },
+        { wid: 9998,        name: 'NVMe 兼容性回归',          planName: 'NVME_COMPAT',          executorName: 'mock_user', failNum: 1, createDate: '2026-08-18T10:00:00', status: 3 },
+      ], total: 2, page: page, pageSize: 20 } };
+    }
+    // scanTaskFailures 用的 endpoint, body 带 taskId
+    // 返回失败 exec 列表 (含 result=3)
+    if (e === 'getExecList' || e === '/getExecList') {
+      return { code: 200, data: { execList: [
+        { wid: 88001201, execName: 'PCIE 链路训练 - 第 1 次', executorName: 'mock_user', result: 3, execStartTime: '2026-08-19T14:23:11', execFinishTime: '2026-08-19T18:47:55', execTotalTime: 15884 },
+        { wid: 88001202, execName: 'PCIE 链路训练 - 第 2 次', executorName: 'mock_user', result: 3, execStartTime: '2026-08-18T09:00:00', execFinishTime: '2026-08-18T12:30:00', execTotalTime: 12600 },
+      ] } };
+    }
+    if (e === 'executeLogs' || e === '/executeLogs' || e === 'execLogs') {
+      // 同一个 endpoint, 两种响应: scanTaskFailures 要 execList, getCasesForExec 要 logs
+      // 用 body.module_id 区分: scanTaskFailures 不带 module_id, getCasesForExec 带
+      if (body && body.module_id !== undefined) {
+        // ── getCasesForExec: 返回失败用例 logs ──
+        return { code: 200, data: { logs: [
+          Object.assign({}, MOCK_FULL_CASE, { result: 3, caseExecId: 'CEX-001' }),
+          { wid: 88481202, testcase_number: 'PCIE_GEN4_LINK_TRAIN_002', testcase_name: 'PCIe Gen4 x4 ASPM L1 进出', result: 3, failanany: 'L1 进入后唤醒失败, 设备停留在 D3hot', failroot: 'ASPM 协商超时', solution: '复测 5 次, 检查 PM 状态机', execStartTime: '2026-08-19T14:30:00', execFinishTime: '2026-08-19T18:45:00', execTotalTime: 15000 },
+        ] } };
+      }
+      // ── scanTaskFailures: 返回 exec 列表 (含 result=3 的失败项) ──
+      return { code: 200, data: { execList: [
+        { wid: 88001201, execName: 'PCIE 链路训练 - 第 1 次', executorName: 'mock_user', result: 3, execStartTime: '2026-08-19T14:23:11', execFinishTime: '2026-08-19T18:47:55', execTotalTime: 15884 },
+        { wid: 88001202, execName: 'PCIE 链路训练 - 第 2 次', executorName: 'mock_user', result: 3, execStartTime: '2026-08-18T09:00:00', execFinishTime: '2026-08-18T12:30:00', execTotalTime: 12600 },
+      ] } };
+    }
+    if (e === 'getCaseLogText') {
+      return { code: 200, data: { logText: MOCK_FULL_CASE.logText } };
+    }
+    return { code: 200, data: {} };
+  }
+
   function detectPage() {
     const url = window.location.pathname;
     if (url.indexOf('taskDetail') !== -1) return 'TASK_DETAIL';
@@ -16,9 +88,14 @@
     return params.get('taskId');
   }
   function shouldInjectButton() {
+    // mock 模式下, localhost:8000 任意路径都注入按钮 (便于本地演示)
+    if (isMockMode()) {
+      return /^http:\/\/localhost:8000\//.test(window.location.href);
+    }
     return /Dml\/AiTest\//.test(window.location.href);
   }
   async function aiTestApi(endpoint, body) {
+    if (isMockMode()) return mockAiTestApi(endpoint, body);
     const token = localStorage.getItem('acess_token');
     if (!token) throw new Error('AiTest 未登录');
     const res = await fetch(AITEST_API + endpoint, {
@@ -55,19 +132,10 @@
     return { totalCount: tasks.length, tasks: tasks };
   }
   async function scanProjectsList() {
-    console.log('[TestMateX] scanProjectsList 开始, 当前页面:', detectPage());
+    console.log('[TestMateX] scanProjectsList 开始, 当前页面:', detectPage(), 'mock=' + isMockMode());
     try {
-      const token = localStorage.getItem('acess_token');
-      if (!token) throw new Error('AiTest 未登录 (localStorage 无 acess_token)');
-      console.log('[TestMateX] 尝试调用 getExecProjectList API...');
-      const res = await fetch(AITEST_API + '/getExecProjectList', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'aich-acess-token': token, 'Referer': window.location.href },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (data.code !== 200) throw new Error('API 错误: ' + (data.msg || '未知'));
+      // 走 aiTestApi (mock 模式下自动短路到 mockAiTestApi, prod 模式下走真实 fetch + token 校验)
+      const data = await aiTestApi('/getExecProjectList', {});
       const projects = (data.data && data.data.project_list) || [];
       console.log('[TestMateX] API 返回', projects.length, '个项目');
       return projects.map(function (p) {
@@ -152,6 +220,7 @@
   }
   async function scanTaskFailures(taskId, daysBack) {
     daysBack = daysBack || 7;
+    console.log('[TestMateX] scanTaskFailures:', { taskId: taskId, daysBack: daysBack, isMock: isMockMode() });
     const data = await aiTestApi('/getExecList', {
       search: '',
       filters: { executorName: [], result: [] },
@@ -162,6 +231,7 @@
       sorters: { execTotalTime: 0 },
     });
     const execList = (data.data && data.data.execList) || [];
+    console.log('[TestMateX] scanTaskFailures execList:', execList.length, '条');
     let failedExecs = execList.filter(function (e) { return e.result === 3; });
     if (daysBack > 0) {
       const cutoff = Date.now() - daysBack * 86400000;
@@ -216,6 +286,7 @@
     return { execWid: Number(execWid), cases: result, allCases: allCases };
   }
   async function extractFailureCase() {
+    if (isMockMode()) return mockExtractFailureCase();
     const taskId = getTaskIdFromUrl();
     if (!taskId) throw new Error('URL 缺少 taskId');
     const failedExecs = await scanTaskFailures(taskId, 0);
@@ -241,6 +312,29 @@
       extractedAt: new Date().toISOString(),
     };
   }
+  function mockExtractFailureCase() {
+    console.log('[TestMateX MOCK] extractFailureCase');
+    return {
+      source: 'aitest-mock',
+      taskId: MOCK_TASK_ID,
+      taskName: MOCK_PROJECT_NAME,
+      execution: {
+        wid: 88001201,
+        execName: 'PCIE 链路训练 - 第 1 次',
+        executorName: 'mock_user',
+        execStartTime: '2026-08-19T14:23:11',
+        execFinishTime: '2026-08-19T18:47:55',
+        execTotalTime: 15884,
+      },
+      failedCases: [MOCK_FULL_CASE],
+      primaryCase: MOCK_FULL_CASE,
+      logText: MOCK_FULL_CASE.logText,
+      logTextIps: MOCK_FULL_CASE.logTextIps,
+      extractedAt: new Date().toISOString(),
+      mock: true,
+    };
+  }
+
   function extractIps(text) {
     if (!text) return [];
     const matches = text.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g) || [];
@@ -271,8 +365,8 @@
     const btn = document.createElement('button');
     btn.id = 'testmatex-trigger-btn';
     btn.className = 'testmatex-floating-btn';
-    btn.innerHTML = '<span class="testmatex-icon">🚀</span><span>一键提单到 PingCode</span>';
-    btn.title = 'TestMateX';
+    btn.innerHTML = '<span class="testmatex-icon">🚀</span><span>自动化分析与提单</span>';
+    btn.title = 'TestMateX - 自动化分析提单';
     btn.addEventListener('click', async function () {
       const originalText = btn.innerHTML;
       btn.disabled = true;

@@ -1,0 +1,35 @@
+========================================
+SSD 测试串口日志 - Exec 88001201
+任务: S3100V1R1 PCIE 链路训练稳定性
+DUT SN: SN-DEMINGLI-SSD-001
+时间: 2026-08-19 14:23:11 ~ 18:47:55
+========================================
+
+[14:23:11.234] [BOOT] FW version: S3100V1R1B01
+[14:23:11.235] [BOOT] FPGA version: v3.2.1
+[14:23:11.236] [BOOT] Driver: nvme 6.2.1-ubuntu
+[14:23:12.001] [PCIE] Link training start, target Gen4 x4
+[14:23:12.005] [PCIE] Current speed: Gen4 x4
+[14:23:12.010] [PCIE] LTSSM: Detect.Active
+[14:23:12.500] [PCIE] LTSSM: Polling.Active
+[14:23:13.001] [PCIE] LTSSM: Polling.Config
+[14:23:13.502] [PCIE] LTSSM: Config.Linkwidth.Start
+[14:23:14.003] [PCIE] LTSSM: Config.Linkwidth.Accept
+[14:23:14.504] [PCIE] LTSSM: Config.Complete
+[14:23:15.005] [PCIE] LTSSM: Config.Idle
+[14:23:15.887] [PCIE] LTSSM: Detect -> Polling.Active (loop 1/5000)
+[14:23:18.022] [PCIE] [WARN] Polling.Compliance timeout (>2s), event 7/5000
+[14:23:20.445] [PCIE] [WARN] Fallback to Gen3 x4
+[14:23:21.001] [PCIE] LTSSM: Detect -> Polling.Active (loop 2/5000)
+[14:25:30.000] [PCIE] [WARN] Polling.Compliance timeout, event 1523/5000
+[14:30:00.000] [PCIE] [WARN] Polling.Compliance timeout, event 3012/5000
+[14:35:00.000] [PCIE] [WARN] Polling.Compliance timeout, event 4521/5000
+[18:47:55.000] [TEST] FAIL: Link instability observed (3/5000 events)
+[18:47:55.001] [TEST] Expected: 0 events
+[18:47:55.002] [TEST] Actual: 3 events
+[18:47:55.003] [EXIT] code=3
+[18:47:55.004] [EXIT] DONE
+
+========================================
+END OF LOG
+========================================

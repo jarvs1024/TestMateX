@@ -1,0 +1,22 @@
+========================================
+训练器 Trace - Exec 88001201
+========================================
+
+T+000.000ms | START | Entering LTSSM loop 1
+T+000.500ms | DETECT | Polling.Active entry
+T+001.000ms | POLL  | Config request sent
+T+002.000ms | ERROR | Compliance timeout (TLP not received)
+T+003.000ms | RETRY | Back to Detect
+T+005.000ms | LOOP  | Loop 2 started
+... (4980 loops skipped for brevity)
+T+1500000ms | LOOP  | Loop 3012 started
+T+1500002ms | ERROR | Compliance timeout (TLP not received)
+T+1500003ms | RETRY | Back to Detect
+T+2000000ms | LOOP  | Loop 4521 started
+T+2000002ms | ERROR | Compliance timeout (TLP not received)
+T+2000003ms | RETRY | Back to Detect
+T+2500000ms | DONE  | Final: FAIL (3 errors)
+
+========================================
+END OF TRACE
+========================================

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock AiTest - 入口</title>
+  <link rel="stylesheet" href="/static/css/mock.css">
+</head>
+<body>
+  <header class="top-nav">
+    <span class="logo">🧪 Mock AiTest</span>
+    <nav>
+      <a href="/Dml/AiTest/index/automationManage-library">项目列表 (library)</a>
+      <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">任务详情 (taskDetail)</a>
+      <a href="/pingcode.html">PingCode</a>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <span class="ant-breadcrumb-item">首页</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">Mock 测试入口</span>
+  </div>
+
+  <main class="content">
+    <div class="mock-banner">
+      <strong>🧪 Mock 环境</strong> — 这是一个本地静态靶场, 模拟 AiTest / PingCode 的关键 DOM 结构。
+      用于在无内网权限时开发 / 测试 TestMateX 浏览器插件。
+    </div>
+
+    <section class="card">
+      <h2>入口说明</h2>
+      <div class="kv-grid">
+        <div class="k">1. 项目列表页 (library)</div>
+        <div class="v"><code>/Dml/AiTest/index/automationManage-library</code> — 模拟 ant-table 项目 / 任务表</div>
+        <div class="k">2. 任务详情页 (taskDetail)</div>
+        <div class="v"><code>/Dml/AiTest/index/automationManage-taskDetail?taskId=9999</code> — 模拟单个任务 + 失败用例</div>
+        <div class="k">3. PingCode 登录页</div>
+        <div class="v"><code>/pingcode.html</code> — 模拟 PingCode 已登录态 (提供 JWT 接口)</div>
+        <div class="k">4. ENV 模式</div>
+        <div class="v">默认 <code>mock</code> — 数据由 <code>js/config.js</code> 控制, 切 <code>prod</code> 即走真实抓取</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>使用流程</h2>
+      <div class="kv-grid">
+        <div class="k">步骤 1</div><div class="v">打开 <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">任务详情页</a></div>
+        <div class="k">步骤 2</div><div class="v">点击右下角浮动按钮 🚀 自动化分析与提单</div>
+        <div class="k">步骤 3</div><div class="v">侧边栏弹出, 选择失败用例, 点击 [提交到 PingCode]</div>
+        <div class="k">步骤 4</div><div class="v">弹窗显示 S3100V1R1-NNNN 伪工单号 (mock 模式) 或真实工单 (prod 模式)</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

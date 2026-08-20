@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock PLM - 工单</title>
+  <link rel="stylesheet" href="/static/css/mock.css">
+</head>
+<body>
+  <header class="top-nav">
+    <span class="logo">🧪 Mock PLM</span>
+    <nav>
+      <a href="/index.html">Mock AiTest</a>
+      <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">任务详情</a>
+      <a href="/pingcode.html">PingCode</a>
+      <a href="/mock-plm.html" class="active">PLM</a>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <span class="ant-breadcrumb-item">首页</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">PLM 问题管理</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link" id="plm-bug-id">PLM-XXXX</span>
+  </div>
+
+  <main class="content">
+    <div class="mock-banner">
+      <strong>🧪 Mock PLM 工单页</strong> — 这是模拟 PLM 系统工单展示页, 用于本地验证 TestMateX 提单跳转。
+    </div>
+
+    <section class="card">
+      <h2>工单详情</h2>
+      <div class="kv-grid">
+        <div class="k">工单号</div><div class="v" id="kv-bug-id" style="font-family:monospace;font-weight:600;">PLM-XXXX</div>
+        <div class="k">标题</div><div class="v" id="kv-title">【测试】【阶段:回片后】...</div>
+        <div class="k">状态</div><div class="v" style="color:#f59e0b;font-weight:600;">待处理</div>
+        <div class="k">负责人</div><div class="v">Mock 测试员</div>
+        <div class="k">创建时间</div><div class="v" id="kv-created">-</div>
+        <div class="k">来源</div><div class="v">TestMateX 浏览器插件</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>说明</h2>
+      <p style="font-size:13px;color:rgba(0,0,0,0.65);line-height:1.7;">
+        此页面用于本地测试。真实 PLM 系统 (例如 <code>http://10.20.x.x:yyyy</code>) 的工单展示页格式可能不同。
+        <br>在 TestMateX 提单成功后, 点击 success 页的"在 PLM 中打开 ↗"链接就会跳到这里, 用于验证 bugUrl 是否正确。
+      </p>
+    </section>
+  </main>
+
+  <script>
+    // 从 URL 路径提取工单号 (/mock-plm/bug/NNNN)
+    const m = location.pathname.match(/\/mock-plm\/bug\/(\d+)/);
+    if (m) {
+      const id = 'PLM-' + m[1];
+      document.getElementById('plm-bug-id').textContent = id;
+      document.getElementById('kv-bug-id').textContent = id;
+      document.title = 'Mock PLM - ' + id;
+    }
+    document.getElementById('kv-created').textContent = new Date().toLocaleString('zh-CN');
+  </script>
+</body>
+</html>

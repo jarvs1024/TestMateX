@@ -5,6 +5,16 @@
 const PINGCODE_BASE = 'http://10.20.24.30';
 const AITEST_BASE = 'http://10.20.65.23:3000';
 
+// ─── ENV 配置 (镜像 js/config.js, 兼容 classic SW 独立 global) ─────────────
+const __TESTMATEX_CONFIG = {
+  ENV: 'mock',  // 'mock' | 'prod'
+  PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
+  MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+};
+function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
+console.log('[TestMateX BG] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE'));
+
 const STORAGE_KEYS = {
   PENDING_DATA: 'pendingData',
   JWT: 'pingcodeJwt',
@@ -64,6 +74,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         .catch(err => sendResponse({ success: false, error: err.message }));
       return true;
 
+    case 'CHECK_PLM_STATUS':
+      checkPlmStatus()
+        .then(status => sendResponse({ success: true, status }))
+        .catch(err => sendResponse({ success: false, error: err.message }));
+      return true;
+
     case 'USER_LOGIN':
       handleUserLogin()
         .then(result => sendResponse({ success: true, ...result }))
@@ -72,7 +88,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     case 'SUBMIT_TO_PINGCODE':
       handleSubmit(msg.payload)
-        .then(result => sendResponse({ success: true, ...result }))
+        .then(result => sendResponse({ success: true, ...result, system: 'pingcode' }))
+        .catch(err => sendResponse({ success: false, error: err.message }));
+      return true;
+
+    case 'SUBMIT_TO_PLM':
+      handleSubmitToPLM(msg.payload)
+        .then(result => sendResponse({ success: true, ...result, system: 'plm' }))
         .catch(err => sendResponse({ success: false, error: err.message }));
       return true;
 
@@ -190,7 +212,32 @@ async function handleUserLogin() {
   };
 }
 
+async function checkPlmStatus() {
+  // ── MOCK: PLM 默认已连接 ──
+  if (isMockMode()) {
+    return {
+      authenticated: true,
+      user: { display_name: 'Mock PLM 用户', name: 'mock_plm_user', id: 'mock-plm-user-id' },
+      mock: true,
+    };
+  }
+  // ── PROD: stub, 真实 PLM 鉴权后续接入 ──
+  throw new Error('PLM prod 鉴权尚未实现, 请联系开发补 PLM 登录流程');
+}
+
 async function checkPingCodeStatus() {
+  // ── MOCK: 跳过真实 JWT 拉取, 返回伪造身份 ──
+  if (isMockMode()) {
+    cachedJWT = cachedJWT || 'MOCK_JWT_' + Date.now();
+    jwtExpiresAt = Date.now() + 24 * 3600 * 1000;
+    cachedUser = cachedUser || {
+      display_name: 'Mock 测试员',
+      name: 'mock_user',
+      id: 'mock-user-id',
+    };
+    return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true, mock: true };
+  }
+
   if (cachedJWT && Date.now() < jwtExpiresAt - 60 * 1000) {
     return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true };
   }
@@ -212,6 +259,20 @@ async function checkPingCodeStatus() {
 }
 
 async function handleSubmit(payload) {
+  // ── MOCK: 不走真实 PingCode, 返回伪造提单结果 ──
+  if (isMockMode()) {
+    console.log('[TestMateX BG MOCK] 拦截提单, payload keys:', Object.keys(payload || {}).join(','));
+    await new Promise(r => setTimeout(r, 600));  // 模拟网络延迟
+    const mockBugId = 1000 + Math.floor(Math.random() * 9000);
+    const projectKey = (await loadConfig()).projectKey;
+    return {
+      bugId: String(mockBugId),
+      wholeIdentifier: 'S3100V1R1-' + mockBugId,
+      bugUrl: tmxBase('PINGCODE') + '/mock-pingcode/bug/' + mockBugId,
+      raw: { mock: true, payload_keys: Object.keys(payload || {}), _id: 'mock-' + mockBugId, identifier: String(mockBugId), whole_identifier: 'S3100V1R1-' + mockBugId, projectKey: projectKey },
+    };
+  }
+
   const status = await checkPingCodeStatus();
   if (!status.authenticated) throw new Error('PingCode 未登录: ' + (status.error || '未知'));
 
@@ -228,9 +289,29 @@ async function handleSubmit(payload) {
   };
 }
 
+// ─── PLM 提单 (stub, prod 未实现) ────────────────────────────────────────
+async function handleSubmitToPLM(payload) {
+  // MOCK: 返回伪造 PLM 工单号
+  if (isMockMode()) {
+    console.log('[TestMateX BG MOCK PLM] 拦截 PLM 提单, payload keys:', Object.keys(payload || {}).join(','));
+    await new Promise(r => setTimeout(r, 600));
+    const plmId = 5000 + Math.floor(Math.random() * 9000);
+    return {
+      bugId: String(plmId),
+      wholeIdentifier: 'PLM-' + plmId,
+      bugUrl: tmxBase('PLM') + '/mock-plm/bug/' + plmId,
+      raw: { mock: true, system: 'plm', payload_keys: Object.keys(payload || {}), _id: 'mock-plm-' + plmId, identifier: 'PLM-' + plmId },
+    };
+  }
+  // PROD: stub, 真实 PLM API 待补
+  throw new Error('PLM prod API 尚未实现, 请联系开发补 /api/plm/work-items 路由 (当前 PROD.PLM_BASE=' + __TESTMATEX_CONFIG.PROD.PLM_BASE + ')');
+}
+
 async function getPreviewHtml(payload) {
+  // ── MOCK: 不需要真实 JWT, 直接用 mock token 渲染 ──
+  const jwt = isMockMode() ? 'MOCK_JWT' : cachedJWT;
   const config = await loadConfig();
-  const pc = new PingCodeClient(cachedJWT, config);
+  const pc = new PingCodeClient(jwt, config);
   return pc.renderHtml(payload);
 }
 

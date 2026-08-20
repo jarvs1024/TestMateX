@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock AiTest - 项目列表</title>
+  <link rel="stylesheet" href="/static/css/mock.css">
+</head>
+<body>
+  <header class="top-nav">
+    <span class="logo">🧪 Mock AiTest</span>
+    <nav>
+      <a href="/Dml/AiTest/index/automationManage-library" class="active">项目列表 (library)</a>
+      <a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">任务详情 (taskDetail)</a>
+      <a href="/pingcode.html">PingCode</a>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <span class="ant-breadcrumb-item">首页</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-item">执行项目</span>
+    <span class="ant-breadcrumb-separator">/</span>
+    <span class="ant-breadcrumb-link">S3100V1R1 性能回归</span>
+  </div>
+
+  <main class="content">
+    <div class="mock-banner">
+      <strong>📋 library 页</strong> — 这是模拟的 "执行项目" 列表页。
+      表格行 <code>tr.ant-table-row</code> + 链接 <code>a[href*="automationManage-task"]</code> 是 extractor 的关键 DOM 钩子。
+    </div>
+
+    <section class="card">
+      <h2>项目列表</h2>
+      <div class="meta">共 2 个项目</div>
+      <table class="ant-table">
+        <thead>
+          <tr>
+            <th>项目名</th>
+            <th>类型</th>
+            <th>任务数</th>
+            <th>最近更新</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ant-table-row" data-row-key="1">
+            <td>
+              <a href="/Dml/AiTest/index/automationManage-task?projectName=S3100V1R1%E6%80%A7%E8%83%BD%E5%9B%9E%E5%BD%92&execProjectType=1&taskId=9999">S3100V1R1 性能回归</a>
+            </td>
+            <td>性能</td>
+            <td>8</td>
+            <td>2026-08-19 18:48:00</td>
+            <td><a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9999">查看任务</a></td>
+          </tr>
+          <tr class="ant-table-row" data-row-key="2">
+            <td>
+              <a href="/Dml/AiTest/index/automationManage-task?projectName=S3100V1R1%E5%85%BC%E5%AE%B9%E6%80%A7&execProjectType=2&taskId=9998">S3100V1R1 兼容性</a>
+            </td>
+            <td>兼容性</td>
+            <td>12</td>
+            <td>2026-08-18 11:20:00</td>
+            <td><a href="/Dml/AiTest/index/automationManage-taskDetail?taskId=9998">查看任务</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

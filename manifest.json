@@ -1,18 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "TestMateX - AiTest 至 PingCode 提单助手",
+  "name": "TestMateX - 自动化分析提单助手",
   "version": "0.1.0",
-  "description": "AiTest 自动化测试失败用例一键提单到 PingCode 问题单系统",
+  "description": "AiTest 自动化测试失败用例分析与一键提单 (PingCode / PLM)",
   "minimum_chrome_version": "114",
   "permissions": [
     "sidePanel",
     "storage",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "http://10.20.65.23:3000/*",
-    "http://10.20.24.30/*"
+    "http://10.20.24.30/*",
+    "http://localhost:8000/*"
   ],
   "background": {
     "service_worker": "background/sw.js"
@@ -20,9 +22,11 @@
   "content_scripts": [
     {
       "matches": [
-        "http://10.20.65.23:3000/Dml/AiTest/*"
+        "http://10.20.65.23:3000/Dml/AiTest/*",
+        "http://localhost:8000/*"
       ],
       "js": [
+        "js/config.js",
         "content/ai-test-extractor.js"
       ],
       "css": [
@@ -33,9 +37,11 @@
     },
     {
       "matches": [
-        "http://10.20.24.30/*"
+        "http://10.20.24.30/*",
+        "http://localhost:8000/*"
       ],
       "js": [
+        "js/config.js",
         "content/pingcode-bridge.js"
       ],
       "run_at": "document_idle",
@@ -46,7 +52,7 @@
     "default_path": "sidepanel/sidepanel.html"
   },
   "action": {
-    "default_title": "TestMateX - 打开提单面板",
+    "default_title": "TestMateX - 自动化分析提单",
     "default_icon": {
       "16": "icons/16.png",
       "48": "icons/48.png",

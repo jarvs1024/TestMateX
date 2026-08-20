@@ -7,9 +7,31 @@
 (() => {
   const PINGCODE_BASE = 'http://10.20.24.30';
 
+  // ─── ENV 读取 ───
+  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+    ENV: 'mock',
+    PROD: { PINGCODE_BASE: 'http://10.20.24.30' },
+    MOCK: { PINGCODE_BASE: 'http://localhost:8000' },
+  };
+  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+
+  // ─── Mock 响应 ───
+  const MOCK_JWT = 'eyJhbGciOiJIUzI1NiJ9.MOCK_TOKEN_' + Date.now() + '.mock_signature';
+  const MOCK_USER = {
+    id: 'mock-user-id',
+    name: 'mock_user',
+    display_name: 'Mock 测试员',
+    email: 'mock@testmatex.local',
+  };
+
   // 监听来自 Background / SidePanel 的请求
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'GET_PINGCODE_JWT') {
+      if (isMockMode()) {
+        console.log('[TestMateX BRIDGE MOCK] 返回伪造 JWT');
+        sendResponse({ success: true, token: MOCK_JWT });
+        return true;
+      }
       fetchAccessToken()
         .then(token => sendResponse({ success: true, token }))
         .catch(err => sendResponse({ success: false, error: err.message }));
@@ -17,6 +39,10 @@
     }
 
     if (msg.action === 'GET_PINGCODE_USER') {
+      if (isMockMode()) {
+        sendResponse({ success: true, user: MOCK_USER });
+        return true;
+      }
       fetchMe()
         .then(user => sendResponse({ success: true, user }))
         .catch(err => sendResponse({ success: false, error: err.message }));
@@ -24,6 +50,10 @@
     }
 
     if (msg.action === 'PING_PINGCODE_HEALTH') {
+      if (isMockMode()) {
+        sendResponse({ success: true, code: 200 });
+        return true;
+      }
       // 健康检查:fetch 一个公开/已知的 API 看是否 200
       fetch('/api/typhon/account/me', { credentials: 'include' })
         .then(r => r.json())

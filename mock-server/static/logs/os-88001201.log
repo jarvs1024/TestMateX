@@ -1,0 +1,14 @@
+========================================
+OS 日志 (Ubuntu 22.04) - Exec 88001201
+========================================
+
+Aug 19 14:23:11 test-host kernel: nvme nvme0: pci function 0000:01:00.0
+Aug 19 14:23:11 test-host kernel: nvme nvme0: Shutdown latency set to 2000 ms
+Aug 19 14:23:12 test-host kernel: pcieport 0000:00:01.0: AER: Corrected error
+Aug 19 14:23:12 test-host kernel: pcieport 0000:00:01.0: device [144d:a808] error status/mask=00000001/00002000
+Aug 19 14:23:15 test-host kernel: nvme nvme0: I/O 56 QID 4 timeout, completion polled
+Aug 19 18:47:55 test-host kernel: nvme nvme0: Removing after probe failure status: -19
+
+========================================
+END OF OS LOG
+========================================

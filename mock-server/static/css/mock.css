@@ -1,0 +1,97 @@
+/* mock-server 共享样式 - 模拟 Ant Design + AiTest 视觉 */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f0f2f5;
+  color: rgba(0,0,0,0.85);
+  font-size: 14px;
+}
+header.top-nav {
+  background: #001529;
+  color: #fff;
+  height: 56px;
+  display: flex; align-items: center;
+  padding: 0 24px;
+}
+header.top-nav .logo { font-size: 18px; font-weight: 600; margin-right: 32px; }
+header.top-nav nav a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  margin-right: 20px;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+header.top-nav nav a.active { background: #1890ff; color: #fff; }
+header.top-nav nav a:hover { background: rgba(255,255,255,0.1); }
+
+.breadcrumb {
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+.breadcrumb .ant-breadcrumb-link,
+.breadcrumb .ant-breadcrumb-item {
+  color: rgba(0,0,0,0.45);
+  margin-right: 8px;
+}
+.breadcrumb .ant-breadcrumb-link:last-child,
+.breadcrumb .ant-breadcrumb-item:last-child { color: rgba(0,0,0,0.85); font-weight: 500; }
+
+main.content { padding: 24px; }
+section.card {
+  background: #fff;
+  border-radius: 4px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  margin-bottom: 16px;
+}
+section.card h2 { margin: 0 0 16px; font-size: 16px; font-weight: 600; }
+section.card .meta { color: rgba(0,0,0,0.45); font-size: 12px; margin-bottom: 16px; }
+
+table.ant-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+table.ant-table thead th {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 500;
+  color: rgba(0,0,0,0.85);
+}
+table.ant-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+table.ant-table tbody tr.ant-table-row:hover { background: #fafafa; }
+table.ant-table tbody tr.ant-table-row td a {
+  color: #1890ff;
+  text-decoration: none;
+}
+table.ant-table .status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+table.ant-table .status-tag.fail { background: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+table.ant-table .status-tag.pass { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+.mock-banner {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #d48806;
+}
+.mock-banner strong { color: #ad6800; }
+
+.kv-grid { display: grid; grid-template-columns: 200px 1fr; gap: 8px 16px; font-size: 13px; }
+.kv-grid .k { color: rgba(0,0,0,0.45); }
+.kv-grid .v { color: rgba(0,0,0,0.85); }
