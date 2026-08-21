@@ -354,25 +354,7 @@
       if (state.currentTask) ts.value = state.currentTask.taskId;
     }
 
-    const es = document.getElementById('exec-select');
-    if (es) {
-      if (state.failedExecs && state.failedExecs.length > 0) {
-        let esOpts = '<option value="">-- 全部 --</option>';
-        state.failedExecs.forEach(function (e, idx) {
-          esOpts += '<option value="' + e.wid + '">' +
-            (idx + 1) + '. ' + (e.execStartTime || '').substring(0, 16) + ' | ' + (e.executorName || '?') + '</option>';
-        });
-        es.innerHTML = esOpts;
-        // 问题2: 同时更新顶部 #list-summary 为首个 exec 名称 (避免“未扫描”占位文)
-        const summary = document.getElementById('list-summary');
-        if (summary) {
-          const e0 = state.failedExecs[0];
-          summary.textContent = (e0.execStartTime || '').substring(0, 16) + ' | ' + (e0.executorName || '?');
-        }
-      } else {
-        es.innerHTML = '<option value="">未扫描</option>';
-      }
-    }
+    // (exec-select 已删,不再渲染)
   }
 
   async function onProjectChange() {
@@ -459,7 +441,8 @@
           return;
         }
       }
-      const response = await sendToContentScript(tab.id, 'SCAN_TASK_FAILURES', {
+      // 直接调 GET_TASK_ALL_FAILURES: 按 taskId 一路拿全 task 的失败用例 (不再走 exec 中间层)
+      const response = await sendToContentScript(tab.id, 'GET_TASK_ALL_FAILURES', {
         taskId: state.currentTask.taskId, daysBack: 7
       });
       if (!response || !response.success) {
@@ -468,14 +451,15 @@
         showToast('扫描失败：' + errorMsg, 'error');
         return;
       }
-      state.failedExecs = response.data || [];
-      renderBreadcrumb();
-      if (state.failedExecs.length === 0) {
-        showEmpty('范围内无失败执行');
-        return;
-      }
-      await loadCasesForExec(state.failedExecs[0].wid);
-      showToast('扫到 ' + state.failedExecs.length + ' 次失败执行', 'success');
+      // 扁平化: [{ exec, failedCases }] → [{ testcase_number, testcase_name, ... }]
+      const allCases = [];
+      (response.data || []).forEach(function (r) {
+        (r.failedCases || []).forEach(function (c) { allCases.push(c); });
+      });
+      state.currentCases = allCases;
+      state.selectedCases = allCases.length > 0 ? new Set([allCases[0].wid]) : new Set();
+      renderCases();
+      showToast('扫到 ' + allCases.length + ' 个失败用例', 'success');
     } catch (e) {
       showToast('扫描出错: ' + e.message, 'error');
     } finally {
