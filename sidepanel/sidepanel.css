@@ -158,7 +158,6 @@ html, body {
   font-size: 11px;
   background: white;
   min-width: 100px;
-  max-width: 240px;
   flex: 1 1 0;
   outline: none;
 }
