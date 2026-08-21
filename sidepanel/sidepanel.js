@@ -459,10 +459,11 @@
           return;
         }
       }
+      console.log('[TMX-DBG] scan() taskId=' + state.currentTask.taskId);
       const response = await sendToContentScript(tab.id, 'GET_TASK_ALL_FAILURES', {
         taskId: state.currentTask.taskId, daysBack: 7
       });
-      console.log('[TestMateX DEBUG] scan() response:', JSON.stringify(response).substring(0, 800));
+      console.log('[TMX-DBG] response.success=' + (response && response.success) + ' dataLen=' + ((response && response.data) || []).length + ' firstFailedCases=' + (((response && response.data && response.data[0]) || {}).failedCases || []).length);
       if (!response || !response.success) {
         const errorMsg = (response && response.error) || '未知错误';
         console.error('[TestMateX] 扫描失败:', errorMsg);
@@ -474,7 +475,6 @@
       (response.data || []).forEach(function (r) {
         (r.failedCases || []).forEach(function (c) { allCases.push(c); });
       });
-      console.log('[TestMateX DEBUG] allCases=' + allCases.length + ' state.currentTask=' + JSON.stringify(state.currentTask));
       state.currentCases = allCases;
       state.selectedCases = allCases.length > 0 ? new Set([allCases[0].wid]) : new Set();
       renderCases();
