@@ -7,7 +7,7 @@ const AITEST_BASE = 'http://10.20.65.23:3000';
 
 // ─── ENV 配置 (镜像 js/config.js, 兼容 classic SW 独立 global) ─────────────
 const __TESTMATEX_CONFIG = {
-  ENV: 'mock',  // 'mock' | 'prod'
+  ENV: 'prod',  // 'mock' | 'prod'
   PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
   MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
 };
