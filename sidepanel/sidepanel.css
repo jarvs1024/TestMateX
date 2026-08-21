@@ -45,8 +45,16 @@ html, body {
 
 .brand-sub {
   font-size: 11px;
-  opacity: 0.75;
   margin-left: 2px;
+}
+.brand-env {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 10px;
 }
 
 .status-rows {
@@ -390,16 +398,20 @@ html, body {
 }
 
 .case-num {
-  font-weight: 600;
-  font-size: 11px;
+  font-weight: 500;
+  font-size: 10px;
   font-family: monospace;
-  color: #4f46e5;
+  color: #6b7280;
   flex-shrink: 0;
+  background: #f3f4f6;
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 
 .case-name {
-  font-size: 12px;
-  color: #1f2937;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -421,8 +433,9 @@ html, body {
   font-size: 11px;
   color: #6b7280;
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.5;
 }
 
 .case-body {
