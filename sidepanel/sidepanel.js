@@ -325,7 +325,7 @@
   function renderBreadcrumb() {
     const ps = document.getElementById('project-select');
     if (!ps) return;
-    let psOpts = '<option value="">-- 选项目 --</option>';
+    let psOpts = '<option value="">请选择项目</option>';
     if (state.projects && state.projects.length > 0) {
       state.projects.forEach(function (p) {
         const sel = state.currentProject && state.currentProject.projectName === p.projectName ? ' selected' : '';
@@ -370,7 +370,7 @@
           summary.textContent = (e0.execStartTime || '').substring(0, 16) + ' | ' + (e0.executorName || '?');
         }
       } else {
-        es.innerHTML = '<option value="">未扫描</option>';
+        es.innerHTML = '<option value="">请先进入任务详情后刷新</option>';
       }
     }
   }
