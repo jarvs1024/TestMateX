@@ -68,19 +68,19 @@ html, body {
 }
 .status-toast.hidden { display: none; }
 .status-toast.success {
-  background: #22c55e;
-  color: white;
-  border-color: #16a34a;
+  background: #d1fae5;        /* 浅绿 */
+  color: #065f46;            /* 深绿文字 */
+  border: 1px solid #6ee7b7;
 }
 .status-toast.error {
-  background: #ef4444;
-  color: white;
-  border-color: #dc2626;
+  background: #fee2e2;        /* 浅红 */
+  color: #991b1b;             /* 深红 */
+  border: 1px solid #fca5a5;
 }
 .status-toast.info {
-  background: #3b82f6;
-  color: white;
-  border-color: #2563eb;
+  background: #dbeafe;        /* 浅蓝 */
+  color: #1e40af;             /* 深蓝 */
+  border: 1px solid #93c5fd;
 }
 
 
