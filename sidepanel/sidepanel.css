@@ -135,7 +135,7 @@ html, body {
 /* ─── 面包屑 (浅色) ─── */
 .breadcrumb {
   display: flex;
-  gap: 4px;
+  gap: 5px;
   align-items: center;
   font-size: 11px;
   padding: 6px 10px;
@@ -145,6 +145,12 @@ html, body {
   flex-shrink: 0;
 }
 
+.bc-label {
+  color: #6b7280;
+  font-size: 11px;
+  flex-shrink: 0;
+  user-select: none;
+}
 .bc-select {
   padding: 3px 6px;
   border: 1px solid #d1d5db;
@@ -182,6 +188,13 @@ html, body {
   transition: all 0.15s;
 }
 .bc-btn:hover { background: #e5e7eb; }
+.bc-rescan {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
 /* 图标按钮 */
 .icon-btn {

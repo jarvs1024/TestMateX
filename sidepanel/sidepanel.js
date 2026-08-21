@@ -83,7 +83,7 @@
     document.getElementById('btn-plm-reauth').addEventListener('click', pollPlm);
     document.getElementById('project-select').addEventListener('change', onProjectChange);
     document.getElementById('exec-select').addEventListener('change', onExecChange);
-    document.getElementById('btn-pick-library').addEventListener('click', pickProject);
+    document.getElementById('btn-rescan').addEventListener('click', pickProject);
     document.getElementById('btn-scan').addEventListener('click', scan);
     // 'check-all' checkbox 已删 (改单选模式, 不再需要 toggleAll 绑定)
     document.getElementById('btn-submit-selected').addEventListener('click', function () { gotoEdit(); });
