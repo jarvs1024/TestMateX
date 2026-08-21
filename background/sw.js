@@ -4,16 +4,25 @@
 
 const PINGCODE_BASE = 'http://10.20.24.30';
 const AITEST_BASE = 'http://10.20.65.23:3000';
+const PLM_BASE = 'https://plm.twsc.com.cn';
 
 // ─── ENV 配置 (镜像 js/config.js, 兼容 classic SW 独立 global) ─────────────
 const __TESTMATEX_CONFIG = {
   ENV: 'prod',  // 'mock' | 'prod'
-  PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
-  MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+  PROD: {
+    AITEST_BASE: 'http://10.20.65.23:3000',
+    PINGCODE_BASE: 'http://10.20.24.30',
+    PLM_BASE: 'https://plm.twsc.com.cn',
+  },
+  MOCK: {
+    AITEST_BASE: 'http://localhost:8000',
+    PINGCODE_BASE: 'http://localhost:8000',
+    PLM_BASE: 'http://localhost:8000',
+  },
 };
 function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
 function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
-console.log('[TestMateX BG] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE'));
+console.log('[TestMateX BG] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE') + ' PLM=' + tmxBase('PLM'));
 
 const STORAGE_KEYS = {
   PENDING_DATA: 'pendingData',
@@ -221,8 +230,20 @@ async function checkPlmStatus() {
       mock: true,
     };
   }
-  // ── PROD: stub, 真实 PLM 鉴权后续接入 ──
-  throw new Error('PLM prod 鉴权尚未实现, 请联系开发补 PLM 登录流程');
+  // ── PROD: 通过 PLM 页面 content script 查登录态 + 用户信息 ──
+  const bridgeResult = await callPlmBridge({ action: 'GET_PLM_USER' });
+  if (!bridgeResult || !bridgeResult.success) {
+    const err = (bridgeResult && bridgeResult.error) || 'PLM bridge 调用失败';
+    if (err.indexOf('未登录') !== -1 || err.indexOf('401') !== -1 || err.indexOf('403') !== -1) {
+      return { authenticated: false, error: err };
+    }
+    return { authenticated: false, error: '请先在浏览器打开 https://plm.twsc.com.cn/ 并登录, 然后点 [重鉴权]' };
+  }
+  return {
+    authenticated: true,
+    user: bridgeResult.user,
+    cached: false,
+  };
 }
 
 async function checkPingCodeStatus() {
@@ -303,8 +324,138 @@ async function handleSubmitToPLM(payload) {
       raw: { mock: true, system: 'plm', payload_keys: Object.keys(payload || {}), _id: 'mock-plm-' + plmId, identifier: 'PLM-' + plmId },
     };
   }
-  // PROD: stub, 真实 PLM API 待补
-  throw new Error('PLM prod API 尚未实现, 请联系开发补 /api/plm/work-items 路由 (当前 PROD.PLM_BASE=' + __TESTMATEX_CONFIG.PROD.PLM_BASE + ')');
+  // PROD: 先检查登录态, 再通过 plm-bridge POST /save
+  const status = await checkPlmStatus();
+  if (!status.authenticated) {
+    throw new Error('PLM 未连接: ' + (status.error || '请先在浏览器登录 plm.twsc.com.cn, 然后点 [重鉴权]'));
+  }
+  // 转换 payload: 表单扁平字段 → PLM 字段
+  const plmPayload = buildPlmPayload(payload);
+  const bridgeResult = await callPlmBridge({ action: 'SUBMIT_TO_PLM_HTTP', payload: plmPayload });
+  if (!bridgeResult || !bridgeResult.success) {
+    throw new Error('PLM 提单失败: ' + ((bridgeResult && bridgeResult.error) || '未知'));
+  }
+  const r = bridgeResult.data;
+  if (!r || !r.code || !r.id) {
+    throw new Error('PLM 响应缺工单号或 ID: ' + JSON.stringify(r));
+  }
+  const detailUrl = tmxBase('PLM')
+    + '/yonbip-mm-plmrd/bill/transferCommonRest'
+    + '?serviceCode=plm_base_question_manage'
+    + '&terminalType=1'
+    + '&sbillno=baseQuestionList'
+    + '&id=' + encodeURIComponent(r.id)
+    + '&locale=zh_CN';
+  return {
+    bugId: String(r.id),
+    wholeIdentifier: r.code,
+    bugUrl: detailUrl,
+    raw: r,
+    traceId: bridgeResult.traceId,
+  };
+}
+
+// ─── PLM Payload 转换 ───────────────────────────────────────────────
+// 输入: sidepanel getFormData() 的扁平字段 (caseId, issueDescription, steps, ...)
+// 输出: PLM transferCommonRest 需要的 JSON
+// 字段映射参考 PLM 响应: name / qusDescribe / quesSever / questionPriority / discoveryTime / ...
+function buildPlmPayload(form) {
+  const stage = form.testStage || '回片后';
+  const desc = form.issueDescription || form.caseName || '执行失败';
+  const title = '【测试】【阶段:' + stage + '】' + (form.caseId || '') + ' ' + desc;
+  const now = new Date();
+  const fmtDate = (d) => {
+    const x = d ? new Date(d) : now;
+    const pad = (n) => String(n).padStart(2, '0');
+    return x.getFullYear() + '-' + pad(x.getMonth() + 1) + '-' + pad(x.getDate()) + ' 00:00:00';
+  };
+
+  // 严重程度 / 优先级: 4 档映射 (实际值需根据 PLM 字典调, 先用可行占位)
+  // PLM 响应里 quesSever="2", questionPriority="1"
+  const sevMap = { 'critical': '1', 'high': '2', 'medium': '3', 'low': '4' };
+  const priMap = { 'urgent': '1', 'high': '2', 'medium': '3', 'low': '4' };
+  const severity = form.severity || 'medium';
+  const priority = form.priority || 'medium';
+
+  return {
+    name: title,
+    qusDescribe: buildPlmDescribeHtml(form),
+    quesSever: sevMap[severity] || '2',
+    questionPriority: priMap[priority] || '1',
+    // 问题分类: 用户表单没选的话, 留空让 PLM 默认; 如果选了映射过来
+    questionCgrId: form.questionCgrId || '',
+    // 归属领域 / 模块: 默认
+    quesBelongArea: form.quesBelongArea || '2',
+    QuesmoduleSel: form.QuesmoduleSel || '3',
+    // 时间
+    discoveryTime: fmtDate(form.occurTime || form.startDate || now),
+    resolutionTime: fmtDate(form.resolutionTime),
+    // 备注/补充信息
+    attribute1: (form.caseId || '') + ' / ' + (form.dutSn || ''),
+    attribute2: form.failurePhenomenon || '',
+    // 其他保留字段 (由 PLM 后端自动填: owner, raisePerson, tenant, bustype, lctemplate_id)
+  };
+}
+
+function buildPlmDescribeHtml(form) {
+  const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const p = (label, val) => '<p><strong>' + label + ': </strong>' + esc(val) + '</p>';
+  return [
+    p('标题', form.caseId ? ('用例 ' + form.caseId + ': ' + (form.caseName || '')) : (form.caseName || '')),
+    p('问题描述', form.issueDescription || form.caseName || '-'),
+    p('测试环境', [
+      form.hostIp ? '主机IP: ' + form.hostIp : '',
+      form.hostSn ? 'SN: ' + form.hostSn : '',
+      form.hostOs ? 'OS: ' + form.hostOs : '',
+      form.hostSsdTopology ? 'SSD拓扑: ' + form.hostSsdTopology : '',
+    ].filter(Boolean).join(' | ') || '-'),
+    p('版本信息', [
+      form.fpgaVersion ? 'FPGA: ' + form.fpgaVersion : '',
+      form.fwVersion ? 'FW: ' + form.fwVersion : '',
+      form.driverVersion ? '驱动: ' + form.driverVersion : '',
+    ].filter(Boolean).join(' | ') || '-'),
+    p('预置条件', form.preconditions || '-'),
+    p('关键操作步骤', form.steps || form.caseName || '-'),
+    p('预期效果', form.expectedResult || '-'),
+    p('测试失败现象', form.failurePhenomenon || '-'),
+    p('被测设备', [
+      form.hwVersion ? '硬件版本: ' + form.hwVersion : '',
+      form.dutFwVersion ? '固件版本: ' + form.dutFwVersion : '',
+      form.dutSn ? 'SN: ' + form.dutSn : '',
+    ].filter(Boolean).join(' | ') || '-'),
+    p('日志链接', form.logUrl ? '<a href="' + form.logUrl + '" target="_blank">' + form.logUrl + '</a>' : '-'),
+  ].join('');
+}
+
+// ─── PLM Bridge 调用辅助 ────────────────────────────────────────
+// 找一个打开的 PLM 页签, 给里面的 content script 发消息
+async function callPlmBridge(msg) {
+  try {
+    let tabs = await chrome.tabs.query({ url: 'https://plm.twsc.com.cn/*' });
+    let plmTab = null;
+    if (tabs.length === 0) {
+      console.log('[TestMateX BG] 未找到 PLM tab, 创建后台 tab...');
+      plmTab = await chrome.tabs.create({ url: 'https://plm.twsc.com.cn/', active: false });
+      for (let i = 0; i < 15; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+        try {
+          const probe = await chrome.tabs.sendMessage(plmTab.id, { action: 'PING_PLM_HEALTH' });
+          if (probe && probe.success) break;
+        } catch (e) {
+          if (i === 14) {
+            try { await chrome.tabs.remove(plmTab.id); } catch (_) {}
+            throw new Error('PLM 页签加载超时, 请手动打开 https://plm.twsc.com.cn/ 并重试');
+          }
+        }
+      }
+    } else {
+      plmTab = tabs[0];
+    }
+    const response = await chrome.tabs.sendMessage(plmTab.id, msg);
+    return response;
+  } catch (e) {
+    return { success: false, error: e.message || String(e) };
+  }
 }
 
 async function getPreviewHtml(payload) {

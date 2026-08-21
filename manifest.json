@@ -14,7 +14,8 @@
   "host_permissions": [
     "http://10.20.65.23:3000/*",
     "http://10.20.24.30/*",
-    "http://localhost:8000/*"
+    "http://localhost:8000/*",
+    "https://plm.twsc.com.cn/*"
   ],
   "background": {
     "service_worker": "background/sw.js"
@@ -43,6 +44,17 @@
       "js": [
         "js/config.js",
         "content/pingcode-bridge.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://plm.twsc.com.cn/*"
+      ],
+      "js": [
+        "js/config.js",
+        "content/plm-bridge.js"
       ],
       "run_at": "document_idle",
       "all_frames": false
