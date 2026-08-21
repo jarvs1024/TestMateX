@@ -363,6 +363,12 @@
             (idx + 1) + '. ' + (e.execStartTime || '').substring(0, 16) + ' | ' + (e.executorName || '?') + '</option>';
         });
         es.innerHTML = esOpts;
+        // 问题2: 同时更新顶部 #list-summary 为首个 exec 名称 (避免“未扫描”占位文)
+        const summary = document.getElementById('list-summary');
+        if (summary) {
+          const e0 = state.failedExecs[0];
+          summary.textContent = (e0.execStartTime || '').substring(0, 16) + ' | ' + (e0.executorName || '?');
+        }
       } else {
         es.innerHTML = '<option value="">未扫描</option>';
       }

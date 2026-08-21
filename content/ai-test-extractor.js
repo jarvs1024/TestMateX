@@ -122,7 +122,8 @@
       const taskId = parseInt(row.getAttribute('data-row-key'), 10);
       if (!taskId) continue;
       const cells = row.querySelectorAll('td');
-      const taskName = (cells[1] && cells[1].textContent || '').trim();
+      const taskName = ((cells[1] && cells[1].textContent || '').trim())
+        .replace(/^执行项目\s*[\/／]\s*/, '').replace(/^执行项目\s+/, '');
       const planName = (cells[2] && cells[2].textContent || '').trim();
       const execfailure = (cells[3] && cells[3].textContent || '').trim();
       const createrName = (cells[4] && cells[4].textContent || '').trim();
