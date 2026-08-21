@@ -961,32 +961,19 @@
     } catch (e) {}
   }
 
-  // 单例 toast: 新 toast 出现前先移除旧的, 避免连续调用 (如 '重新鉴权...' → '已连接') 出现重叠
-  let activeToast = null;
+  // 内联消息条 (顶栏 inline, 不再是浮层)
+  // 显示在 topbar 底部 status-rows 之后, 不盖住主内容
   let activeToastTimer = null;
   function showToast(msg, type) {
-    // 1. 清掉前一个 toast (立即移除, 不等 fade-out)
-    if (activeToast && activeToast.parentNode) {
-      activeToast.parentNode.removeChild(activeToast);
-      activeToast = null;
-    }
+    const el = document.getElementById('status-toast');
+    if (!el) return;
     if (activeToastTimer) { clearTimeout(activeToastTimer); activeToastTimer = null; }
-
-    // 2. 创建新 toast
-    const toast = document.createElement('div');
-    // 位置从 top:60px (压在 header 状态行) 改成 top:140px (header 下方, 不遮挡状态信息)
-    toast.style.cssText = 'position:fixed;top:140px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:6px;font-size:12px;z-index:99999;max-width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:center;transition:opacity 0.15s;';
-    if (type === 'success') { toast.style.background = '#f0fdf4'; toast.style.color = '#166534'; toast.style.border = '1px solid #22c55e'; }
-    else if (type === 'error') { toast.style.background = '#fef2f2'; toast.style.color = '#991b1b'; toast.style.border = '1px solid #ef4444'; }
-    else { toast.style.background = '#eff6ff'; toast.style.color = '#1e40af'; toast.style.border = '1px solid #3b82f6'; }
-    toast.innerHTML = msg;
-    document.body.appendChild(toast);
-    activeToast = toast;
-
-    // 3. 到时移除 (error 显示更久)
+    el.className = 'status-toast ' + (type || 'info');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    // 到时自动隐藏 (error 显示更久)
     activeToastTimer = setTimeout(function () {
-      if (toast.parentNode) toast.parentNode.removeChild(toast);
-      if (activeToast === toast) activeToast = null;
+      el.classList.add('hidden');
       activeToastTimer = null;
     }, type === 'error' ? 5000 : 3000);
   }

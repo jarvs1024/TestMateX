@@ -54,6 +54,36 @@ html, body {
   flex-direction: column;
   gap: 2px;
 }
+/* 内联消息条 (替代浮层 toast, 不盖住内容) */
+.status-toast {
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.status-toast.hidden { display: none; }
+.status-toast.success {
+  background: #22c55e;
+  color: white;
+  border-color: #16a34a;
+}
+.status-toast.error {
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+}
+.status-toast.info {
+  background: #3b82f6;
+  color: white;
+  border-color: #2563eb;
+}
+
+
 
 .status-row {
   display: flex;
