@@ -32,7 +32,7 @@
   };
 
   let state = {
-    currentProject: null, currentTask: null, currentExec: null,
+    currentProject: null, currentTask: null, currentExecWid: null, executions: [],currentExec: null,
     failedExecs: [], currentCases: [],
     selectedCases: new Set(), expandedCases: new Set(),
     aiResults: {}, projects: [], tasks: [],
@@ -82,7 +82,7 @@
     document.getElementById('btn-reauth').addEventListener('click', handleReauth);
     document.getElementById('btn-plm-reauth').addEventListener('click', pollPlm);
     document.getElementById('project-select').addEventListener('change', onProjectChange);
-    document.getElementById('task-select').addEventListener('change', onTaskChange);
+    document.getElementById('exec-select').addEventListener('change', onExecChange);
     document.getElementById('btn-pick-library').addEventListener('click', pickProject);
     document.getElementById('btn-scan').addEventListener('click', scan);
     // 'check-all' checkbox 已删 (改单选模式, 不再需要 toggleAll 绑定)
@@ -384,6 +384,8 @@
     state.currentProject = { projectName: projectName, execProjectType: execProjectType };
     state.currentTask = null;
     state.failedExecs = [];
+    state.executions = [];
+    state.currentExecWid = null;
     state.tasks = [];
 
     try {
@@ -403,29 +405,9 @@
     } catch (e) {}
   }
 
-  async function onTaskChange() {
-    const ts = document.getElementById('task-select');
-    const taskId = ts.value;
-    if (!taskId) return;
-    const task = state.tasks.find(function (t) { return t.taskId === parseInt(taskId, 10); });
-    state.currentTask = task ? {
-      taskId: task.taskId, taskName: task.taskName,
-      projectName: state.currentProject ? state.currentProject.projectName : ''
-    } : { taskId: parseInt(taskId, 10), taskName: '任务 #' + taskId };
-    try {
-      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
-        ? 'http://localhost:8000/*'
-        : 'http://10.20.65.23:3000/Dml/AiTest/*';
-      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
-      if (tabs && tabs.length) {
-        const url = tabs[0].url;
-        const baseUrl = url.split('?')[0].replace('automationManage-task', 'automationManage-taskDetail');
-        const newUrl = baseUrl + '?taskId=' + taskId + '&menu=execute';
-        await chrome.tabs.update(tabs[0].id, { url: 'http://10.20.65.23:3000' + newUrl });
-        setTimeout(detectAndScan, 1500);
-      }
-    } catch (e) {}
+  async function onExecChange() {
+    const es = document.getElementById('exec-select');
+    if (es && es.value) state.currentExecWid = parseInt(es.value, 10);
   }
 
   async function pickProject() {
@@ -439,7 +421,6 @@
     const btn = document.getElementById('btn-scan');
     if (btn) { btn.disabled = true; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>扫描中...'; }
     try {
-      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
       const aitestUrlPattern = isMockMode()
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
@@ -449,37 +430,50 @@
         return;
       }
       const tab = tabs[0];
-      // 强制从 URL 读 taskId, 不要信 state.currentTask.taskId (可能在任务详情页被错赋值成 exec wid)
       const urlParams = new URLSearchParams(tab.url.split('?')[1] || '');
       const urlTaskId = parseInt(urlParams.get('taskId') || '0', 10);
       if (!urlTaskId) {
-        showToast('URL 中未找到 taskId, 请在 AiTest 任务详情页打开', 'error');
+        showToast('URL 中未找到 taskId', 'error');
         return;
       }
-      // 同步 state.currentTask (后续提单等逻辑还要用)
-      state.currentTask = {
-        taskId: urlTaskId,
-        taskName: (state.currentTask && state.currentTask.taskId === urlTaskId) ? state.currentTask.taskName : ('任务 #' + urlTaskId),
-        projectName: state.currentProject ? state.currentProject.projectName : ''
-      };
-      console.log('[TMX-DBG] scan() taskId=' + state.currentTask.taskId);
-      const response = await sendToContentScript(tab.id, 'GET_TASK_ALL_FAILURES', {
-        taskId: urlTaskId, daysBack: 7
-      });
-      console.log('[TMX-DBG] response.success=' + (response && response.success) + ' dataLen=' + ((response && response.data) || []).length + ' firstFailedCases=' + (((response && response.data && response.data[0]) || {}).failedCases || []).length);
+      // 步骤1: 扫 task 下的 executions, 填 exec-select 下拉
+      const r0 = await sendToContentScript(tab.id, 'SCAN_TASK_FAILURES', { taskId: urlTaskId, daysBack: 30 });
+      if (r0 && r0.success && Array.isArray(r0.data)) {
+        state.executions = r0.data;
+        renderExecSelect();
+        console.log('[TMX-DBG] scan() executions=' + state.executions.length);
+      } else {
+        state.executions = [];
+        renderExecSelect();
+      }
+      // 默认选中第一个 exec
+      if (!state.currentExecWid && state.executions.length > 0) {
+        state.currentExecWid = state.executions[0].wid;
+      }
+      const es = document.getElementById('exec-select');
+      if (es && state.currentExecWid) es.value = String(state.currentExecWid);
+      if (!state.currentExecWid) {
+        showToast('该任务下没有失败执行', 'error');
+        return;
+      }
+      // 步骤2: 按选中 exec 拿失败 cases
+      const response = await sendToContentScript(tab.id, 'GET_CASES_FOR_EXEC', { execWid: state.currentExecWid });
+      console.log('[TMX-DBG] response.success=' + (response && response.success) + ' cases=' + ((response && response.data && response.data.cases) || []).length);
       if (!response || !response.success) {
         const errorMsg = (response && response.error) || '未知错误';
-        console.error('[TestMateX] 扫描失败:', errorMsg);
         showToast('扫描失败：' + errorMsg, 'error');
         return;
       }
-      // 扁平化: [{ exec, failedCases }] → cases 一维数组
-      const allCases = [];
-      (response.data || []).forEach(function (r) {
-        (r.failedCases || []).forEach(function (c) { allCases.push(c); });
-      });
+      const allCases = (response && response.data && response.data.cases) || [];
       state.currentCases = allCases;
       state.selectedCases = allCases.length > 0 ? new Set([allCases[0].wid]) : new Set();
+      // 同步提单用的 task 上下文
+      state.currentTask = {
+        taskId: urlTaskId,
+        taskName: '任务 #' + urlTaskId,
+        projectName: state.currentProject ? state.currentProject.projectName : '',
+        currentExec: state.executions.find(function (e) { return e.wid === state.currentExecWid; }) || null
+      };
       renderCases();
       showToast('扫到 ' + allCases.length + ' 个失败用例', 'success');
     } catch (e) {
@@ -489,24 +483,19 @@
     }
   }
 
-  async function loadCasesForExec(execWid) {
-    try {
-      // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
-        ? 'http://localhost:8000/*'
-        : 'http://10.20.65.23:3000/Dml/AiTest/*';
-      const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
-      if (!tabs || !tabs.length) return;
-      const response = await sendToContentScript(tabs[0].id, 'GET_CASES_FOR_EXEC', { execWid: execWid });
-      if (!response || !response.success) {
-        showToast('加载用例失败', 'error');
-        return;
-      }
-      state.currentCases = response.data.cases || [];
-      // 单选模式: 默认只选第一个失败用例
-      state.selectedCases = new Set([state.currentCases[0].wid]);
-      renderCases();
-    } catch (e) {}
+  function renderExecSelect() {
+    const es = document.getElementById('exec-select');
+    if (!es) return;
+    if (!state.executions || state.executions.length === 0) {
+      es.innerHTML = '<option value="">-- 选执行 --</option>';
+      return;
+    }
+    let opts = '<option value="">-- 选执行 --</option>';
+    state.executions.forEach(function (e, idx) {
+      const sel = state.currentExecWid === e.wid ? ' selected' : '';
+      opts += '<option value="' + e.wid + '"' + sel + '>' + (idx + 1) + '. ' + (e.execName || '?') + ' | ' + (e.executorName || '?') + ' | ' + (e.execStartTime || '?').substring(0, 16) + '</option>';
+    });
+    es.innerHTML = opts;
   }
 
   function renderCases() {
