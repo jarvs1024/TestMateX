@@ -428,16 +428,16 @@
             break;
           case 'GET_TASK_ALL_FAILURES': {
             const failedExecs = await scanTaskFailures(msg.opts?.taskId, msg.opts?.daysBack || 7);
-            const result = [];
-            for (let i = 0; i < failedExecs.length; i++) {
-              try {
-                const casesData = await getCasesForExec(failedExecs[i].wid);
-                result.push({ exec: failedExecs[i], failedCases: casesData.cases });
-              } catch (e) {
-                result.push({ exec: failedExecs[i], failedCases: [], error: e.message });
-              }
-            }
-            data = result;
+            // 并行拿每个 failed exec 的 cases (每个 exec 独立, 互不依赖)
+            const settled = await Promise.allSettled(failedExecs.map(function (e) {
+              return getCasesForExec(e.wid).then(function (casesData) {
+                return { exec: e, failedCases: casesData.cases };
+              });
+            }));
+            data = settled.map(function (r, i) {
+              if (r.status === 'fulfilled') return r.value;
+              return { exec: failedExecs[i], failedCases: [], error: r.reason && r.reason.message || String(r.reason) };
+            });
             break;
           }
           case 'GET_PROJECT_INFO':

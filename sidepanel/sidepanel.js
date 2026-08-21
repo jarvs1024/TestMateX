@@ -354,7 +354,25 @@
       if (state.currentTask) ts.value = state.currentTask.taskId;
     }
 
-    // (exec-select 已删,不再渲染)
+    const es = document.getElementById('exec-select');
+    if (es) {
+      if (state.failedExecs && state.failedExecs.length > 0) {
+        let esOpts = '<option value="">-- 全部 --</option>';
+        state.failedExecs.forEach(function (e, idx) {
+          esOpts += '<option value="' + e.wid + '">' +
+            (idx + 1) + '. ' + (e.execStartTime || '').substring(0, 16) + ' | ' + (e.executorName || '?') + '</option>';
+        });
+        es.innerHTML = esOpts;
+        // 问题2: 同时更新顶部 #list-summary 为首个 exec 名称 (避免“未扫描”占位文)
+        const summary = document.getElementById('list-summary');
+        if (summary) {
+          const e0 = state.failedExecs[0];
+          summary.textContent = (e0.execStartTime || '').substring(0, 16) + ' | ' + (e0.executorName || '?');
+        }
+      } else {
+        es.innerHTML = '<option value="">未扫描</option>';
+      }
+    }
   }
 
   async function onProjectChange() {
@@ -441,7 +459,6 @@
           return;
         }
       }
-      // 直接调 GET_TASK_ALL_FAILURES: 按 taskId 一路拿全 task 的失败用例 (不再走 exec 中间层)
       const response = await sendToContentScript(tab.id, 'GET_TASK_ALL_FAILURES', {
         taskId: state.currentTask.taskId, daysBack: 7
       });
@@ -451,7 +468,7 @@
         showToast('扫描失败：' + errorMsg, 'error');
         return;
       }
-      // 扁平化: [{ exec, failedCases }] → [{ testcase_number, testcase_name, ... }]
+      // 扁平化: [{ exec, failedCases }] → cases 一维数组
       const allCases = [];
       (response.data || []).forEach(function (r) {
         (r.failedCases || []).forEach(function (c) { allCases.push(c); });
