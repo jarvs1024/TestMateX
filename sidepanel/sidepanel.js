@@ -449,19 +449,22 @@
         return;
       }
       const tab = tabs[0];
-      if (!state.currentTask) {
-        const urlParams = new URLSearchParams(tab.url.split('?')[1] || '');
-        const taskId = parseInt(urlParams.get('taskId') || '0', 10);
-        if (taskId) {
-          state.currentTask = { taskId: taskId, taskName: '任务 #' + taskId, projectName: state.currentProject ? state.currentProject.projectName : '' };
-        } else {
-          showToast('未找到任务 ID', 'error');
-          return;
-        }
+      // 强制从 URL 读 taskId, 不要信 state.currentTask.taskId (可能在任务详情页被错赋值成 exec wid)
+      const urlParams = new URLSearchParams(tab.url.split('?')[1] || '');
+      const urlTaskId = parseInt(urlParams.get('taskId') || '0', 10);
+      if (!urlTaskId) {
+        showToast('URL 中未找到 taskId, 请在 AiTest 任务详情页打开', 'error');
+        return;
       }
+      // 同步 state.currentTask (后续提单等逻辑还要用)
+      state.currentTask = {
+        taskId: urlTaskId,
+        taskName: (state.currentTask && state.currentTask.taskId === urlTaskId) ? state.currentTask.taskName : ('任务 #' + urlTaskId),
+        projectName: state.currentProject ? state.currentProject.projectName : ''
+      };
       console.log('[TMX-DBG] scan() taskId=' + state.currentTask.taskId);
       const response = await sendToContentScript(tab.id, 'GET_TASK_ALL_FAILURES', {
-        taskId: state.currentTask.taskId, daysBack: 7
+        taskId: urlTaskId, daysBack: 7
       });
       console.log('[TMX-DBG] response.success=' + (response && response.success) + ' dataLen=' + ((response && response.data) || []).length + ' firstFailedCases=' + (((response && response.data && response.data[0]) || {}).failedCases || []).length);
       if (!response || !response.success) {

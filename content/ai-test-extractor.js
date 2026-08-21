@@ -115,6 +115,23 @@
   async function scanTasksFromDOM() {
     const pageType = detectPage();
     if (pageType !== 'TASK_LIST' && pageType !== 'TASK_DETAIL') throw new Error('请在任务列表页打开');
+    // 任务详情页: 不抓表格行 (那是 executions 不是 tasks), 只从 breadcrumb + URL 拿当前 task
+    if (pageType === 'TASK_DETAIL') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const taskId = parseInt(urlParams.get('taskId') || '0', 10);
+      if (!taskId) return { totalCount: 0, tasks: [] };
+      return {
+        totalCount: 1,
+        tasks: [{
+          taskId: taskId,
+          taskName: getTaskNameFromBreadcrumb() || ('任务 #' + taskId),
+          planName: '',
+          execfailure: '',
+          createrName: '',
+          createDate: '',
+        }]
+      };
+    }
     const rows = document.querySelectorAll('tr.ant-table-row[data-row-key]');
     const tasks = [];
     for (let i = 0; i < rows.length; i++) {
