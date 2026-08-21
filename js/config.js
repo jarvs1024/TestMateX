@@ -10,7 +10,7 @@
   const DEFAULT_CONFIG = {
     // 'mock' - 本地开发 (无内网依赖, 全部走 mock-server)
     // 'prod' - 生产环境 (走真实 AiTest / PingCode)
-    ENV: 'mock',
+    ENV: 'prod',
 
     // 生产环境地址
     PROD: {
