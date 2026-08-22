@@ -159,7 +159,7 @@ html, body {
 
 /* ─── 面包屑 (浅色) ─── */
 .breadcrumb {
-  display: flex;
+  display: none;
   gap: 5px;
   align-items: center;
   font-size: 11px;
@@ -168,6 +168,9 @@ html, body {
   border-bottom: 1px solid #e5e7eb;
   overflow-x: auto;
   flex-shrink: 0;
+}
+.breadcrumb.visible {
+  display: flex;
 }
 
 .bc-label {

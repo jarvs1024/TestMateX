@@ -49,6 +49,7 @@
     setTimeout(detectAndScan, 500);
     setupUrlWatcher();
     applyEnvBadge();
+    switchPage('page-list');  // 确保初始 page-list 上面包屑可见
   }
 
   function applyEnvBadge() {
@@ -588,6 +589,12 @@
     }
     const target = document.getElementById(targetId);
     if (target) target.classList.add('active');
+    // 面包屑 (项目+执行 选择) 只在 page-list 显示: 选 source 那一步
+    const bc = document.getElementById('app').querySelector('.breadcrumb');
+    if (bc) {
+      if (targetId === 'page-list') bc.classList.add('visible');
+      else bc.classList.remove('visible');
+    }
   }
 
   function gotoList() {
