@@ -69,7 +69,14 @@
           <span class="page-meta" id="list-summary"></span>
         </div>
         <div class="page-actions">
-          <span class="select-mode-tag">单选</span>
+          <button class="btn btn-small btn-secondary" id="btn-toggle-all" title="全选 / 取消全选">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span id="toggle-all-label">全选</span>
+          </button>
+          <button class="btn btn-small btn-secondary" id="btn-clear-cases" title="清空列表 (清除已扫描的失败用例)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            清空
+          </button>
           <button class="btn btn-small btn-primary" id="btn-scan">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             扫描
@@ -85,7 +92,7 @@
       <div class="action-bar-fixed">
         <button class="btn btn-primary" id="btn-submit-selected" disabled>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
-          下一步: 编辑工单 (<span id="submit-count">0</span>)
+          <span id="submit-label">下一步: 编辑工单</span> (<span id="submit-count">0</span>)
         </button>
         <button class="btn btn-secondary" id="btn-ai-batch">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/><path d="M5 3v4M19 17v4M3 5h4M17 19h4"/></svg>

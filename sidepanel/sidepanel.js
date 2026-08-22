@@ -88,6 +88,8 @@
     // 'check-all' checkbox 已删 (改单选模式, 不再需要 toggleAll 绑定)
     document.getElementById('btn-submit-selected').addEventListener('click', function () { gotoEdit(); });
     document.getElementById('btn-ai-batch').addEventListener('click', aiBatch);
+    document.getElementById('btn-clear-cases').addEventListener('click', clearCases);
+    document.getElementById('btn-toggle-all').addEventListener('click', toggleAllCases);
     document.getElementById('btn-edit-back-2').addEventListener('click', gotoList);
     // 编辑页 [下一步: 确认提单] → 渲染预览页 + 跳到 page-preview (用户最后确认后再点 [确认提交] 才真正发)
     document.getElementById('btn-edit-next').addEventListener('click', submitFromEdit);
@@ -486,7 +488,7 @@
     const submitCount = document.getElementById('submit-count');
     summary.textContent = '共 ' + state.currentCases.length + ' 失败用例';
     submitCount.textContent = state.selectedCases.size;
-    submitBtn.disabled = state.selectedCases.size === 0;
+    updateBtnStates();
     if (state.currentCases.length === 0) {
       list.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>无失败用例</p></div>';
       return;
@@ -543,24 +545,15 @@
         const card = cb.closest('.case-card');
         const wid = parseInt(card.dataset.wid, 10);
         if (cb.checked) {
-          // 单选模式: 勾选新用例前, 先清掉所有其他选中
-          state.selectedCases.clear();
+          // 多选模式: 各自切换
           state.selectedCases.add(wid);
-          list.querySelectorAll('.case-card').forEach(function (otherCard) {
-            const otherWid = parseInt(otherCard.dataset.wid, 10);
-            if (otherWid !== wid) {
-              otherCard.classList.remove('selected');
-              const otherCb = otherCard.querySelector('input[data-action="select"]');
-              if (otherCb) otherCb.checked = false;
-            }
-          });
           card.classList.add('selected');
         } else {
           state.selectedCases.delete(wid);
           card.classList.remove('selected');
         }
         document.getElementById('submit-count').textContent = state.selectedCases.size;
-        document.getElementById('btn-submit-selected').disabled = state.selectedCases.size === 0;
+        updateBtnStates();
       });
     });
   }
@@ -576,6 +569,60 @@
   }
 
   // AI 分析功能开发中, 暂时只提示用户
+  function updateBtnStates() {
+    const submitBtn = document.getElementById('btn-submit-selected');
+    const aiBtn = document.getElementById('btn-ai-batch');
+    const submitLabel = document.getElementById('submit-label');
+    const submitCount = document.getElementById('submit-count');
+    const n = state.selectedCases.size;
+    const total = state.currentCases.length;
+
+    // 编辑工单 label 文案 (不重写 button.innerHTML, 否则会销毁 #submit-count 等子节点)
+    // N==1: 紫底 enabled; 其他 (0 或 ≥2): 紫底 disabled 不可提交 (跟 N=0 同)
+    submitBtn.className = 'btn btn-primary';
+    if (n === 1) {
+      submitBtn.disabled = false;
+      submitBtn.title = '';
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.title = n === 0
+        ? '请先勾选用例'
+        : '编辑工单只支持单个用例, 请取消多余勾选 (当前 ' + n + ')';
+    }
+    if (submitLabel) submitLabel.textContent = '下一步: 编辑工单';
+    if (submitCount) submitCount.textContent = n;
+
+    // AI 分析: ≥1 启用
+    aiBtn.disabled = n === 0;
+
+    // 全选 toggle 文案
+    const toggleLabel = document.getElementById('toggle-all-label');
+    if (toggleLabel) {
+      if (total > 0 && n === total) toggleLabel.textContent = '取消全选';
+      else toggleLabel.textContent = '全选';
+    }
+  }
+
+  function toggleAllCases() {
+    const total = state.currentCases.length;
+    if (total === 0) return;
+    const allWid = state.currentCases.map(function (c) { return c.wid; });
+    // 当前已全选 -> 取消全选; 否则全选
+    if (state.selectedCases.size === total) {
+      state.selectedCases = new Set();
+    } else {
+      state.selectedCases = new Set(allWid);
+    }
+    renderCases();
+  }
+
+  function clearCases() {
+    state.selectedCases = new Set();
+    state.currentCases = [];
+    renderCases();
+    showToast('已清空失败用例列表', 'success');
+  }
+
   function aiBatch() {
     showToast('AI 分析功能开发中, 敬请期待', 'info');
   }
