@@ -61,7 +61,9 @@
     setInterval(pollPingCode, 8000);
     setTimeout(pollPingCode, 200);
     setInterval(pollPlm, 8000);
-    setTimeout(pollPlm, 250);
+    // 开启插件后立即尝试 PLM 自动连接 (缓存有效则秒连)
+    setTimeout(pollPlm, 0);
+    setTimeout(pollPlm, 2000);  // 兜底重试 (首次后台建 tab 较慢)
     setTimeout(detectAndScan, 500);
     setupUrlWatcher();
     applyEnvBadge();
@@ -96,7 +98,7 @@
   function bindEvents() {
     document.getElementById('btn-reconnect').addEventListener('click', detectAndScan);
     document.getElementById('btn-reauth').addEventListener('click', handleReauth);
-    document.getElementById('btn-plm-reauth').addEventListener('click', pollPlm);
+    document.getElementById('btn-plm-reauth').addEventListener('click', handlePlmReauth);
     document.getElementById('project-select').addEventListener('change', onProjectChange);
     document.getElementById('exec-select').addEventListener('change', onExecChange);
     document.getElementById('btn-rescan').addEventListener('click', pickProject);
@@ -139,6 +141,43 @@
     document.getElementById('edit-stage').addEventListener('change', onStageChange);
   }
 
+
+  // 用户小图标 (已连接时, 在用户名左侧展示)
+  function userIconSvg() {
+    return '<svg class="user-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">'
+      + '<circle cx="8" cy="5.5" r="2.8" stroke="currentColor" stroke-width="1.4"/>'
+      + '<path d="M2.5 14C2.5 11.5 5 9.5 8 9.5C11 9.5 13.5 11.5 13.5 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+      + '</svg>';
+  }
+
+  // 警告小图标 (未连接 / 会话过期 时展示)
+  function warnIconSvg() {
+    return '<svg class="warn-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">'
+      + '<path d="M8 1.8L14.8 13.8H1.2L8 1.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
+      + '<line x1="8" y1="6" x2="8" y2="9.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+      + '<circle cx="8" cy="11.7" r="0.75" fill="currentColor"/>'
+      + '</svg>';
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[<>&"\']/g, function (c) {
+      return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // 已连接: "已登录 [👤] <用户名>"
+  function renderConnected(el, name, mock) {
+    if (!el || !name) return;
+    el.innerHTML = '已登录 ' + userIconSvg() + ' ' + (mock ? '🧪 ' : '') + escapeHtml(name);
+  }
+
+  // 未连接: "[⚠] 未连接"
+  function renderDisconnected(el) {
+    if (!el) return;
+    el.innerHTML = warnIconSvg() + ' 未连接';
+  }
+
+
   async function pollPingCode() {
     try {
       const res = await chrome.runtime.sendMessage({ action: 'CHECK_PINGCODE_STATUS' });
@@ -147,26 +186,41 @@
       if (res && res.success && res.status && res.status.authenticated) {
         const name = res.status.user && (res.status.user.display_name || '已连接');
         if (dot) dot.className = 'status-dot ok';
-        if (val) val.textContent = (res.status.mock ? '🧪 ' : '') + name;
+        renderConnected(val, name, res.status.mock);
       } else {
         if (dot) dot.className = 'status-dot error';
-        if (val) val.textContent = '未连接';
+        renderDisconnected(val);
       }
     } catch (e) {}
   }
 
+  // PLM 自动连接状态机:
+  //  - 'init'      : 还没轮询过, 等首次结果
+  //  - 'connected' : 已确认连上
+  //  - 'failed'    : 已尝试且失败 (轮询不再 toast)
+  let plmAutoState = 'init';
+
   async function pollPlm() {
     try {
-      const res = await chrome.runtime.sendMessage({ action: 'CHECK_PLM_STATUS' });
       const dot = document.getElementById('plm-dot');
       const val = document.getElementById('plm-status');
+      // 等待态: loading 圆点 + 「连接中...」
+      if (plmAutoState === 'init' && dot) dot.className = 'status-dot loading';
+      if (plmAutoState === 'init' && val) val.innerHTML = warnIconSvg() + ' 连接中...';
+
+      const res = await chrome.runtime.sendMessage({ action: 'CHECK_PLM_STATUS' });
       if (res && res.success && res.status && res.status.authenticated) {
         const name = res.status.user && (res.status.user.display_name || '已连接');
+        const wasInit = (plmAutoState === 'init');
+        plmAutoState = 'connected';
         if (dot) dot.className = 'status-dot ok plm';
-        if (val) val.textContent = (res.status.mock ? '🧪 ' : '') + name;
+        renderConnected(val, name, res.status.mock);
+        // 首次自动连接成功: 弹一次轻量 toast 提示用户
+        if (wasInit) showToast('PLM 自动连接成功 (' + name + ')', 'success');
       } else {
+        plmAutoState = 'failed';
         if (dot) dot.className = 'status-dot error';
-        if (val) val.textContent = '未连接';
+        renderDisconnected(val);
       }
     } catch (e) {}
   }
@@ -1000,17 +1054,41 @@
   }
 
   async function handleReauth() {
-    showToast('重新鉴权...', 'info');
+    showToast('重新鉴权 PingCode...', 'info');
     try {
       // 强制重连: USER_LOGIN 内部会清污染缓存 (mock JWT/user), 走真实拉 JWT
       const res = await chrome.runtime.sendMessage({ action: 'USER_LOGIN' });
       if (res && res.success) {
-        showToast('已连接 (' + (res.user && (res.user.display_name || res.user.name) || '已登录') + ')', 'success');
+        const name = (res.user && (res.user.display_name || res.user.name)) || '已登录';
+        showToast('PingCode 已连接 (' + name + ')', 'success');
       } else {
-        showToast(res && res.error || '鉴权失败', 'error');
+        showToast('PingCode 未登录或会话已过期, 请在 http://10.20.24.30/ 页面重新登录或刷新, 再点【重鉴】', 'error');
       }
     } catch (e) {
-      showToast('鉴权失败: ' + e.message, 'error');
+      showToast('PingCode 鉴权失败: ' + e.message, 'error');
+    }
+  }
+
+
+  // PLM 重鉴: 镜像 handleReauth() 的 toast 行为 (成功/失败都有提示)
+  async function handlePlmReauth() {
+    showToast('重新鉴权 PLM...', 'info');
+    try {
+      const res = await chrome.runtime.sendMessage({ action: 'CHECK_PLM_STATUS' });
+      const dot = document.getElementById('plm-dot');
+      const val = document.getElementById('plm-status');
+      if (res && res.success && res.status && res.status.authenticated) {
+        const name = res.status.user && (res.status.user.display_name || '已连接');
+        if (dot) dot.className = 'status-dot ok plm';
+        renderConnected(val, name, res.status.mock);
+        showToast('PLM 已连接 (' + name + ')', 'success');
+      } else {
+        if (dot) dot.className = 'status-dot error';
+        renderDisconnected(val);
+        showToast('PLM 未登录或会话已过期, 请在 https://plm.twsc.com.cn/ 页面重新登录或刷新, 再点【重鉴】', 'error');
+      }
+    } catch (e) {
+      showToast('PLM 鉴权失败: ' + e.message, 'error');
     }
   }
 

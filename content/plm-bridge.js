@@ -92,18 +92,60 @@
       return MOCK_USER;
     }
 
-    // 优先从 cookie 解析 userId / tenantId
-    const at = readCookie('at');
     const tenantid = readCookie('tenantid');
-    const userToken = readCookie('yht_usertoken_diwork') || '';
-    // 从 yht_usertoken_diwork 抽 UUID (用友 ST-xxx-...-<uuid>-online)
-    const uuidMatch = userToken.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-    const userId = uuidMatch ? uuidMatch[1] : (at || 'plm-unknown-user');
 
-    // 尝试从 PLM 页面 DOM 抓 display_name (右上角用户信息)
+    // 1. 优先: PLM 首页注入的 window.getUserInfo() (HTML 内联脚本, 见 plm 首页源码)
+    //    返回 {userName, userId, userEmail, userCode, ...}
+    //    首页冷启动时内联脚本可能晚于 bridge 注入, 重试 3 次 (~1.5s) 等它就绪
+    let info = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        if (typeof window.getUserInfo === 'function') {
+          const r = window.getUserInfo();
+          if (r && r.userName) { info = r; break; }
+          console.warn('[AiTestX PLM] window.getUserInfo 已定义但无 userName (尝试 ' + attempt + '/3), page=' + location.pathname);
+        } else {
+          console.warn('[AiTestX PLM] window.getUserInfo 未定义 (尝试 ' + attempt + '/3), page=' + location.pathname);
+        }
+      } catch (e) {
+        console.warn('[AiTestX PLM] window.getUserInfo 调用失败 (尝试 ' + attempt + '/3):', e && e.message);
+      }
+      await new Promise(function (r) { setTimeout(r, 500); });
+    }
+
+    if (info) {
+      console.log('[AiTestX PLM] window.getUserInfo() → ' + info.userName);
+      return {
+        id: info.userId || null,
+        name: info.userName,
+        display_name: info.userName,
+        email: info.userEmail || null,
+        code: info.userCode || null,
+        tenantid: tenantid,
+      };
+    }
+
+    console.warn('[AiTestX PLM] window.getUserInfo 3 次重试后仍不可用, 走 fallback');
+
+    // 2. Fallback: cookie 抽 UUID (at 是 HttpOnly 读不到, 只能兜底)
+    const at = readCookie('at');
+    const userToken = readCookie('yht_usertoken_diwork') || '';
+    const usernameTicket = readCookie('yht_username_diwork') || '';
+    // yht_username_diwork 格式: ST-...-online__<UUID>
+    const uuidRe = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+    const m1 = usernameTicket.match(uuidRe);
+    const m2 = userToken.match(uuidRe);
+    const userId = (m1 && m1[1]) || (m2 && m2[1]) || at || 'plm-unknown-user';
+
+    // 3. Fallback: DOM 抓 display_name
     let displayName = null;
     try {
       const candidates = [
+        // 首页"消息中心" widget (CSS module 去掉 hash 后)
+        document.querySelector('[class*="messageCenterWrapper"] [class*="userName"]'),
+        // 顶栏头像首字符 (任意 PLM 页面都有, 仅首字)
+        document.querySelector('[class*="avator--"] span'),
+        // 旧的兜底选择器 (兼容其他系统)
         document.querySelector('.user-info .user-name'),
         document.querySelector('.user-name'),
         document.querySelector('[data-user-name]'),
@@ -114,7 +156,7 @@
       ];
       for (const el of candidates) {
         if (el) {
-          const t = (el.dataset.userName || el.textContent || el.value || '').trim();
+          const t = ((el.dataset && el.dataset.userName) || el.textContent || el.value || '').trim();
           if (t && t.length > 0 && t.length < 50) {
             displayName = t;
             break;
@@ -128,7 +170,7 @@
     return {
       id: userId,
       name: userId,
-      display_name: displayName || ('PLM 用户 (' + (userId.slice(0, 8)) + ')'),
+      display_name: displayName || ('PLM 已连接 ·' + (userId.slice(0, 8))),
       tenantid: tenantid,
     };
   }

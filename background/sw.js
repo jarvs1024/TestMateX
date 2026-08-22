@@ -274,6 +274,37 @@ async function handleUserLogin() {
   };
 }
 
+// PLM MAIN-world 用户提取: 直接读 window.getUserInfo
+// (content script 跑在 ISOLATED world, 看不到页面 MAIN world 的全局变量)
+// 串行 async 函数, executeScript 会等 Promise resolve 后取结果
+async function plmExtractUserInfoInMainWorld() {
+  const sleep = (ms) => new Promise(function (r) { setTimeout(r, ms); });
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      if (typeof window.getUserInfo === 'function') {
+        const info = window.getUserInfo();
+        if (info && info.userName) {
+          // tenantid 从 cookie 拿 (跟 bridge 同源)
+          const tm = document.cookie.match(/(?:^|;\s*)tenantid=([^;]*)/);
+          return {
+            ok: true,
+            user: {
+              id: info.userId || null,
+              name: info.userName,
+              display_name: info.userName,
+              email: info.userEmail || null,
+              code: info.userCode || null,
+              tenantid: tm ? decodeURIComponent(tm[1]) : null,
+            },
+          };
+        }
+      }
+    } catch (e) { /* retry */ }
+    await sleep(500);
+  }
+  return { ok: false, reason: 'window.getUserInfo 不可用' };
+}
+
 async function checkPlmStatus() {
   // ── MOCK: PLM 默认已连接 ──
   if (isMockMode("PLM")) {
@@ -283,20 +314,28 @@ async function checkPlmStatus() {
       mock: true,
     };
   }
-  // ── PROD: 通过 PLM 页面 content script 查登录态 + 用户信息 ──
-  const bridgeResult = await callPlmBridge({ action: 'GET_PLM_USER' });
-  if (!bridgeResult || !bridgeResult.success) {
-    const err = (bridgeResult && bridgeResult.error) || 'PLM bridge 调用失败';
-    if (err.indexOf('未登录') !== -1 || err.indexOf('401') !== -1 || err.indexOf('403') !== -1) {
-      return { authenticated: false, error: err };
+  // ── PROD: 走 MAIN-world executeScript 拿 window.getUserInfo (绕开 ISOLATED world 隔离) ──
+  try {
+    const tabId = await ensurePlmTab();
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      world: 'MAIN',
+      func: plmExtractUserInfoInMainWorld,
+    });
+    const result = results && results[0] && results[0].result;
+    if (result && result.ok) {
+      return { authenticated: true, user: result.user, cached: false };
     }
-    return { authenticated: false, error: '请先在浏览器打开 https://plm.twsc.com.cn/ 并登录, 然后点 [重鉴权]' };
+    return {
+      authenticated: false,
+      error: 'PLM 未登录或会话已过期, 请在 https://plm.twsc.com.cn/ 页面重新登录或刷新, 再点【重鉴】',
+    };
+  } catch (e) {
+    return {
+      authenticated: false,
+      error: 'PLM 用户信息提取失败: ' + (e && e.message),
+    };
   }
-  return {
-    authenticated: true,
-    user: bridgeResult.user,
-    cached: false,
-  };
 }
 
 async function checkPingCodeStatus() {
@@ -495,31 +534,95 @@ function buildPlmDescribeHtml(form) {
   ].join('');
 }
 
-// ─── PLM Bridge 调用辅助 ────────────────────────────────────────
-// 找一个打开的 PLM 页签, 给里面的 content script 发消息
-async function callPlmBridge(msg) {
-  try {
-    let tabs = await chrome.tabs.query({ url: 'https://plm.twsc.com.cn/*' });
-    let plmTab = null;
-    if (tabs.length === 0) {
-      console.log('[AiTestX BG] 未找到 PLM tab, 创建后台 tab...');
-      plmTab = await chrome.tabs.create({ url: 'https://plm.twsc.com.cn/', active: false });
-      for (let i = 0; i < 15; i++) {
-        await new Promise(r => setTimeout(r, 1000));
+// ─── PLM Tab 选择策略 ──────────────────────────────────────────
+// 优先级:
+//   1. 缓存的 plmBgTabId (上次用的)
+//   2. 用户已打开的任意 PLM tab (homepage 最佳, 子页也能凑合) — 不再建新 tab
+//   3. 都没有才建专用后台 homepage tab (active: false, 用户看不见)
+// 只有新建 tab 时才需要 force-inject (manifest content_scripts 已自动注入已存在的 tab)
+let plmBgTabId = null;
+
+async function ensurePlmTab() {
+  // 1. 复用缓存的 tab
+  if (plmBgTabId !== null) {
+    try {
+      const t = await chrome.tabs.get(plmBgTabId);
+      if (t) return plmBgTabId;
+    } catch (_) {
+      plmBgTabId = null;
+    }
+  }
+  // 2. 复用用户已打开的 PLM tab (避免多开)
+  const existing = await chrome.tabs.query({ url: 'https://plm.twsc.com.cn/*' });
+  if (existing.length > 0) {
+    plmBgTabId = existing[0].id;
+    console.log('[AiTestX BG] 复用用户已开的 PLM tab:', plmBgTabId);
+    return plmBgTabId;
+  }
+  // 3. 都没才建后台 homepage tab
+  console.log('[AiTestX BG] 无 PLM tab, 创建后台首页...');
+  const tab = await chrome.tabs.create({ url: 'https://plm.twsc.com.cn/', active: false });
+  plmBgTabId = tab.id;
+  // 等待 content script 就绪, 失败就 force-inject (新建 tab 没 manifest 自动注入场景)
+  let forced = false;
+  for (let i = 0; i < 15; i++) {
+    await new Promise(r => setTimeout(r, 1000));
+    try {
+      const probe = await chrome.tabs.sendMessage(plmBgTabId, { action: 'PING_PLM_HEALTH' });
+      if (probe && probe.success) return plmBgTabId;
+    } catch (e) {
+      if (i === 4 && !forced) {
         try {
-          const probe = await chrome.tabs.sendMessage(plmTab.id, { action: 'PING_PLM_HEALTH' });
-          if (probe && probe.success) break;
-        } catch (e) {
-          if (i === 14) {
-            try { await chrome.tabs.remove(plmTab.id); } catch (_) {}
-            throw new Error('PLM 页签加载超时, 请手动打开 https://plm.twsc.com.cn/ 并重试');
-          }
+          await chrome.scripting.executeScript({
+            target: { tabId: plmBgTabId },
+            files: ['js/config.js', 'content/plm-bridge.js'],
+          });
+          console.log('[AiTestX BG] 新建 PLM tab force-inject 完成');
+          forced = true;
+        } catch (fe) {
+          console.warn('[AiTestX BG] force-inject 失败:', fe && fe.message);
         }
       }
-    } else {
-      plmTab = tabs[0];
+      if (i === 14) throw new Error('PLM 后台页签加载超时');
     }
-    const response = await chrome.tabs.sendMessage(plmTab.id, msg);
+  }
+  return plmBgTabId;
+}
+
+// 任意已存在的 PLM tab, 同样带 force-inject 兜底 (用于 SUBMIT)
+async function pickAnyPlmTabWithBridge() {
+  const tabs = await chrome.tabs.query({ url: 'https://plm.twsc.com.cn/*' });
+  for (const tab of tabs) {
+    try {
+      const probe = await chrome.tabs.sendMessage(tab.id, { action: 'PING_PLM_HEALTH' });
+      if (probe && probe.success) return tab.id;
+    } catch (_) { /* 这个 tab 没注入, 下一个 */ }
+  }
+  // 全部没就绪: 强制注入第一个, 失败再退回后台 tab
+  if (tabs.length > 0) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        files: ['js/config.js', 'content/plm-bridge.js'],
+      });
+      console.log('[AiTestX BG] 已有 PLM tab force-inject 完成:', tabs[0].id);
+      return tabs[0].id;
+    } catch (fe) {
+      console.warn('[AiTestX BG] force-inject 失败, 回退到后台 tab:', fe && fe.message);
+    }
+  }
+  return ensurePlmTab();
+}
+
+async function callPlmBridge(msg) {
+  try {
+    let tabId;
+    if (msg && msg.action === 'GET_PLM_USER') {
+      tabId = await ensurePlmTab();
+    } else {
+      tabId = await pickAnyPlmTabWithBridge();
+    }
+    const response = await chrome.tabs.sendMessage(tabId, msg);
     return response;
   } catch (e) {
     return { success: false, error: e.message || String(e) };

@@ -118,6 +118,13 @@ html, body {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.status-value .user-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 /* ─── 按钮 ─── */
