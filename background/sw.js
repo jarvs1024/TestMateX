@@ -24,6 +24,23 @@ const __AITESTX_CONFIG = {
     PLM_BASE: 'http://localhost:8000',
   },
 };
+// 把英文 Chrome 扩展 API 错误翻成中文 (避免 sidepanel 直接显示 'Could not establish connection' 等原文)
+function friendlyAuthError(err) {
+  const msg = (err && err.message) || String(err);
+  if (msg.indexOf('Could not establish connection') !== -1 ||
+      msg.indexOf('Receiving end does not exist') !== -1 ||
+      msg.indexOf('The message port closed') !== -1) {
+    return 'PingCode 页面尚未就绪, 请稍后重试 (或刷新 PingCode 页面后再次重鉴)';
+  }
+  if (msg.indexOf('No tab with id') !== -1) {
+    return 'PingCode 标签页已关闭, 请打开 http://10.20.24.30/ 后再试';
+  }
+  if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('net::ERR_') !== -1) {
+    return '网络异常, 请检查 PingCode 网络连通性';
+  }
+  return msg;
+}
+
 function isMockMode(system) {
     const cfg = __AITESTX_CONFIG;
     const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
@@ -95,19 +112,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     case 'CHECK_PINGCODE_STATUS':
       checkPingCodeStatus()
         .then(status => sendResponse({ success: true, status }))
-        .catch(err => sendResponse({ success: false, error: err.message }));
+        .catch(err => sendResponse({ success: false, error: friendlyAuthError(err) }));
       return true;
 
     case 'CHECK_PLM_STATUS':
       checkPlmStatus()
         .then(status => sendResponse({ success: true, status }))
-        .catch(err => sendResponse({ success: false, error: err.message }));
+        .catch(err => sendResponse({ success: false, error: friendlyAuthError(err) }));
       return true;
 
     case 'USER_LOGIN':
       handleUserLogin()
         .then(result => sendResponse({ success: true, ...result }))
-        .catch(err => sendResponse({ success: false, error: err.message }));
+        .catch(err => sendResponse({ success: false, error: friendlyAuthError(err) }));
       return true;
 
     case 'SUBMIT_TO_PINGCODE':
@@ -205,21 +222,37 @@ async function handleUserLogin() {
       throw new Error('PingCode 自动登录失败。请先在浏览器手动打开 http://10.20.24.30/ 登录一次');
     }
   } else {
-    console.log('[AiTestX BG] 找到已有 PingCode tab, 直接获取 JWT...');
+    console.log('[AiTestX BG] 找到已有 PingCode tab, 尝试获取 JWT...');
     const tab = tabs[0];
-    const response = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_JWT' });
-    if (!response || !response.success) {
-      const errorMsg = (response && response.error) || '未知';
-      console.error('[AiTestX BG] JWT 获取失败:', errorMsg);
-      if (errorMsg.indexOf('未登录') !== -1 || errorMsg.indexOf('401') !== -1 || errorMsg.indexOf('403') !== -1) {
-        throw new Error('PingCode 未登录或会话已过期。请重新登录 http://10.20.24.30/');
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_JWT' });
+      if (!response || !response.success) {
+        const errorMsg = (response && response.error) || '未知';
+        console.error('[AiTestX BG] JWT 获取失败:', errorMsg);
+        if (errorMsg.indexOf('未登录') !== -1 || errorMsg.indexOf('401') !== -1 || errorMsg.indexOf('403') !== -1) {
+          throw new Error('PingCode 未登录或会话已过期。请重新登录 http://10.20.24.30/');
+        }
+        throw new Error('拿 JWT 失败：' + errorMsg);
       }
-      throw new Error('拿 JWT 失败：' + errorMsg);
+      token = response.token;
+      console.log('[AiTestX BG] JWT 获取成功');
+      const meRes = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_USER' });
+      if (meRes && meRes.success) user = meRes.user;
+    } catch (e) {
+      // tabs.sendMessage 抛 'Could not establish connection' 等连接错误
+      // 说明该 tab 还没注入 bridge (页面加载中 / SSO 重定向 / content script 未注册)
+      // 退回轮询机制: 关掉旧 tab, 重新走 if 分支 (创建后台 tab 等 bridge 注入)
+      const isConnErr = e.message && (
+        e.message.indexOf('Could not establish connection') !== -1 ||
+        e.message.indexOf('Receiving end does not exist') !== -1 ||
+        e.message.indexOf('The message port closed') !== -1
+      );
+      if (!isConnErr) throw e;
+      console.warn('[AiTestX BG] 已有 PingCode tab 桥接未注入, 关掉旧 tab 并重建后台 tab');
+      try { await chrome.tabs.remove(tab.id); } catch (_) {}
+      // 递归重新走 if 分支 (创建后台 tab + 15s 轮询)
+      return handleUserLogin();
     }
-    token = response.token;
-    console.log('[AiTestX BG] JWT 获取成功');
-    const meRes = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_USER' });
-    if (meRes && meRes.success) user = meRes.user;
   }
 
   cachedJWT = token;
