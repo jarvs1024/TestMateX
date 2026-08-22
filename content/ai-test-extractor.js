@@ -5,13 +5,29 @@
   const AITEST_BASE = 'http://10.20.65.23:3000';
 
   // ─── ENV 读取 (content script 上下文) ───
+  // Fallback: 与 js/config.js DEFAULT_CONFIG 保持一致
+  // 即使 config.js 没注入成功, PingCode/PLM 也默认走 prod, 不会误走 mock
   const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
+    AiTest:   'mock',
+    PingCode: 'prod',
+    PLM:      'prod',
     ENV: 'mock',
-    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
-    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30', PLM_BASE: 'https://plm.twsc.com.cn' },
+    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000', PLM_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
-  function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
+  function isMockMode(system) {
+    const cfg = __AITESTX_CONFIG;
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    if (sys && typeof cfg[sys] === 'string') return cfg[sys] === 'mock';
+    // per-system 字段缺失 → 默认 prod (mock 是主动选择, 不该是默认)
+    return false;
+  }
+  function atxBase(system) {
+    const cfg = __AITESTX_CONFIG;
+    const key = { AITEST: 'AITEST_BASE', PINGCODE: 'PINGCODE_BASE', PLM: 'PLM_BASE' }[system] || (system + '_BASE');
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    return isMockMode(sys) ? cfg.MOCK[key] : cfg.PROD[key];
+  }
 
   // ─── Mock 数据源 ───
   const MOCK_TASK_ID = 9999;
@@ -89,13 +105,13 @@
   }
   function shouldInjectButton() {
     // mock 模式下, localhost:8000 任意路径都注入按钮 (便于本地演示)
-    if (isMockMode()) {
+    if (isMockMode("AiTest")) {
       return /^http:\/\/localhost:8000\//.test(window.location.href);
     }
     return /Dml\/AiTest\//.test(window.location.href);
   }
   async function aiTestApi(endpoint, body) {
-    if (isMockMode()) return mockAiTestApi(endpoint, body);
+    if (isMockMode("AiTest")) return mockAiTestApi(endpoint, body);
     const token = localStorage.getItem('acess_token');
     if (!token) throw new Error('AiTest 未登录');
     const res = await fetch(AITEST_API + endpoint, {
@@ -150,7 +166,7 @@
     return { totalCount: tasks.length, tasks: tasks };
   }
   async function scanProjectsList() {
-    console.log('[AiTestX] scanProjectsList 开始, 当前页面:', detectPage(), 'mock=' + isMockMode());
+    console.log('[AiTestX] scanProjectsList 开始, 当前页面:', detectPage(), 'mock=' + isMockMode("AiTest"));
     try {
       // 走 aiTestApi (mock 模式下自动短路到 mockAiTestApi, prod 模式下走真实 fetch + token 校验)
       const data = await aiTestApi('/getExecProjectList', {});
@@ -238,7 +254,7 @@
   }
   async function scanTaskFailures(taskId, daysBack) {
     daysBack = daysBack || 7;
-    console.log('[AiTestX] scanTaskFailures:', { taskId: taskId, daysBack: daysBack, isMock: isMockMode() });
+    console.log('[AiTestX] scanTaskFailures:', { taskId: taskId, daysBack: daysBack, isMock: isMockMode("AiTest") });
     const data = await aiTestApi('/getExecList', {
       search: '',
       filters: { executorName: [], result: [] },
@@ -304,7 +320,7 @@
     return { execWid: Number(execWid), cases: result, allCases: allCases };
   }
   async function extractFailureCase() {
-    if (isMockMode()) return mockExtractFailureCase();
+    if (isMockMode("AiTest")) return mockExtractFailureCase();
     const taskId = getTaskIdFromUrl();
     if (!taskId) throw new Error('URL 缺少 taskId');
     const failedExecs = await scanTaskFailures(taskId, 0);

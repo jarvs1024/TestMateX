@@ -6,22 +6,29 @@
 (function (root) {
   'use strict';
 
-  // 默认配置 - mock 环境
+  // 默认配置 - 每个系统独立 mock/prod 开关
   const DEFAULT_CONFIG = {
-    // 'mock' - 本地开发 (无内网依赖, 全部走 mock-server)
-    // 'prod' - 生产环境 (走真实 AiTest / PingCode)
+    // ─── 系统级开关 (per-system, 推荐用这个) ───
+    // 'mock' - 本地开发 (无内网依赖, 走 mock-server)
+    // 'prod' - 生产环境 (走真实 AiTest / PingCode / PLM)
+    AiTest:   'mock',
+    PingCode: 'prod',
+    PLM:      'prod',
+
+    // ─── 老字段 ENV ───
+    // 当某系统字段未配置时 (undefined), 退回到这里
     ENV: 'mock',
 
-    // 生产环境地址
+    // ─── Base URL 配置 ───
     PROD: {
-      AITEST_BASE: 'http://10.20.65.23:3000',
+      AITEST_BASE:   'http://10.20.65.23:3000',
       PINGCODE_BASE: 'http://10.20.24.30',
+      PLM_BASE:      'https://plm.twsc.com.cn',
     },
-
-    // Mock 靶场地址 (配合 mock-server/ 静态服务)
     MOCK: {
-      AITEST_BASE: 'http://localhost:8000',
+      AITEST_BASE:   'http://localhost:8000',
       PINGCODE_BASE: 'http://localhost:8000',
+      PLM_BASE:      'http://localhost:8000',
     },
 
     // 调试: 打印详细日志
@@ -31,16 +38,46 @@
   // 保护: 若已有配置 (例如 sidepanel 二次打开), 不覆盖
   root.__AITESTX_CONFIG = root.__AITESTX_CONFIG || DEFAULT_CONFIG;
 
-  // 便捷访问器
-  root.TMX = root.TMX || {};
-  root.TMX.isMock = function () { return root.__AITESTX_CONFIG.ENV === 'mock'; };
-  root.TMX.isProd = function () { return root.__AITESTX_CONFIG.ENV === 'prod'; };
-  root.TMX.base = function (kind) {
-    const cfg = root.__AITESTX_CONFIG;
-    return cfg.ENV === 'mock' ? cfg.MOCK[kind + '_BASE'] : cfg.PROD[kind + '_BASE'];
+  // 系统名 → base_key 映射 (兼容老用法 atxBase('PINGCODE'))
+  const SYSTEM_TO_BASE_KEY = {
+    AiTest: 'AITEST_BASE', PingCode: 'PINGCODE_BASE', PLM: 'PLM_BASE',
+    AITEST: 'AITEST_BASE', PINGCODE: 'PINGCODE_BASE', 'AITEST_BASE': 'AITEST_BASE',
+    'PINGCODE_BASE': 'PINGCODE_BASE', 'PLM_BASE': 'PLM_BASE',
   };
+  const LEGACY_TO_SYSTEM = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' };
 
-  console.log('[AiTestX CFG] ENV=' + root.__AITESTX_CONFIG.ENV +
-    ' AITEST=' + root.TMX.base('AITEST') +
-    ' PINGCODE=' + root.TMX.base('PINGCODE'));
+  function _resolveSystem(system) {
+    if (!system) return null;
+    return LEGACY_TO_SYSTEM[system] || system;
+  }
+
+  // 便捷访问器: per-system mock 判定
+  function isMockMode(system) {
+    const cfg = root.__AITESTX_CONFIG;
+    const sys = _resolveSystem(system);
+    if (sys && cfg[sys] !== undefined) return cfg[sys] === 'mock';
+    return cfg.ENV === 'mock';
+  }
+  function isProdMode(system) {
+    const cfg = root.__AITESTX_CONFIG;
+    const sys = _resolveSystem(system);
+    if (sys && cfg[sys] !== undefined) return cfg[sys] === 'prod';
+    return cfg.ENV === 'prod';
+  }
+  function atxBase(system) {
+    const cfg = root.__AITESTX_CONFIG;
+    const baseKey = SYSTEM_TO_BASE_KEY[system] || (system + '_BASE');
+    const sys = _resolveSystem(system);
+    return isMockMode(sys) ? cfg.MOCK[baseKey] : cfg.PROD[baseKey];
+  }
+
+  root.TMX = root.TMX || {};
+  root.TMX.isMock = isMockMode;
+  root.TMX.isProd = isProdMode;
+  root.TMX.base = atxBase;
+
+  console.log('[AiTestX CFG] AiTest=' + root.__AITESTX_CONFIG.AiTest +
+    ' PingCode=' + root.__AITESTX_CONFIG.PingCode +
+    ' PLM=' + root.__AITESTX_CONFIG.PLM +
+    ' (AITEST_BASE=' + atxBase('AiTest') + ' PINGCODE_BASE=' + atxBase('PingCode') + ' PLM_BASE=' + atxBase('PLM') + ')');
 })(typeof window !== 'undefined' ? window : self);

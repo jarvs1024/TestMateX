@@ -7,8 +7,12 @@ const AITEST_BASE = 'http://10.20.65.23:3000';
 const PLM_BASE = 'https://plm.twsc.com.cn';
 
 // ─── ENV 配置 (镜像 js/config.js, 兼容 classic SW 独立 global) ─────────────
+// per-system 开关: AiTest 走 mock (本地开发), PingCode/PLM 走 prod (真实环境)
 const __AITESTX_CONFIG = {
-  ENV: 'prod',  // 'mock' | 'prod'
+  AiTest:   'mock',
+  PingCode: 'prod',
+  PLM:      'prod',
+  ENV: 'mock',  // legacy, 字段缺失时退化到这里
   PROD: {
     AITEST_BASE: 'http://10.20.65.23:3000',
     PINGCODE_BASE: 'http://10.20.24.30',
@@ -20,8 +24,19 @@ const __AITESTX_CONFIG = {
     PLM_BASE: 'http://localhost:8000',
   },
 };
-function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
-function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
+function isMockMode(system) {
+    const cfg = __AITESTX_CONFIG;
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    if (sys && typeof cfg[sys] === 'string') return cfg[sys] === 'mock';
+    // per-system 字段缺失 → 默认 prod (mock 是主动选择, 不该是默认)
+    return false;
+  }
+  function atxBase(system) {
+    const cfg = __AITESTX_CONFIG;
+    const key = { AITEST: 'AITEST_BASE', PINGCODE: 'PINGCODE_BASE', PLM: 'PLM_BASE' }[system] || (system + '_BASE');
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    return isMockMode(sys) ? cfg.MOCK[key] : cfg.PROD[key];
+  }
 console.log('[AiTestX BG] ENV=' + __AITESTX_CONFIG.ENV + ' PINGCODE=' + atxBase('PINGCODE') + ' PLM=' + atxBase('PLM'));
 
 const STORAGE_KEYS = {
@@ -223,7 +238,7 @@ async function handleUserLogin() {
 
 async function checkPlmStatus() {
   // ── MOCK: PLM 默认已连接 ──
-  if (isMockMode()) {
+  if (isMockMode("PLM")) {
     return {
       authenticated: true,
       user: { display_name: 'Mock PLM 用户', name: 'mock_plm_user', id: 'mock-plm-user-id' },
@@ -248,7 +263,7 @@ async function checkPlmStatus() {
 
 async function checkPingCodeStatus() {
   // ── MOCK: 跳过真实 JWT 拉取, 返回伪造身份 ──
-  if (isMockMode()) {
+  if (isMockMode("PingCode")) {
     cachedJWT = cachedJWT || 'MOCK_JWT_' + Date.now();
     jwtExpiresAt = Date.now() + 24 * 3600 * 1000;
     cachedUser = cachedUser || {
@@ -281,7 +296,7 @@ async function checkPingCodeStatus() {
 
 async function handleSubmit(payload) {
   // ── MOCK: 不走真实 PingCode, 返回伪造提单结果 ──
-  if (isMockMode()) {
+  if (isMockMode("PingCode")) {
     console.log('[AiTestX BG MOCK] 拦截提单, payload keys:', Object.keys(payload || {}).join(','));
     await new Promise(r => setTimeout(r, 600));  // 模拟网络延迟
     const mockBugId = 1000 + Math.floor(Math.random() * 9000);
@@ -313,7 +328,7 @@ async function handleSubmit(payload) {
 // ─── PLM 提单 (stub, prod 未实现) ────────────────────────────────────────
 async function handleSubmitToPLM(payload) {
   // MOCK: 返回伪造 PLM 工单号
-  if (isMockMode()) {
+  if (isMockMode("PLM")) {
     console.log('[AiTestX BG MOCK PLM] 拦截 PLM 提单, payload keys:', Object.keys(payload || {}).join(','));
     await new Promise(r => setTimeout(r, 600));
     const plmId = 5000 + Math.floor(Math.random() * 9000);
@@ -460,7 +475,7 @@ async function callPlmBridge(msg) {
 
 async function getPreviewHtml(payload) {
   // ── MOCK: 不需要真实 JWT, 直接用 mock token 渲染 ──
-  const jwt = isMockMode() ? 'MOCK_JWT' : cachedJWT;
+  const jwt = isMockMode("PingCode") ? 'MOCK_JWT' : cachedJWT;
   const config = await loadConfig();
   const pc = new PingCodeClient(jwt, config);
   return pc.renderHtml(payload);

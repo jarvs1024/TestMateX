@@ -8,12 +8,23 @@
   const PINGCODE_BASE = 'http://10.20.24.30';
 
   // ─── ENV 读取 ───
+  // Fallback: 与 js/config.js DEFAULT_CONFIG 保持一致
+  // 即使 config.js 没注入成功, PingCode/PLM 也默认走 prod, 不会误走 mock
   const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
+    AiTest:   'mock',
+    PingCode: 'prod',
+    PLM:      'prod',
     ENV: 'mock',
     PROD: { PINGCODE_BASE: 'http://10.20.24.30' },
     MOCK: { PINGCODE_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
+  function isMockMode(system) {
+    const cfg = __AITESTX_CONFIG;
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    if (sys && typeof cfg[sys] === 'string') return cfg[sys] === 'mock';
+    // per-system 字段缺失 → 默认 prod (mock 是主动选择, 不该是默认)
+    return false;
+  }
 
   // ─── Mock 响应 ───
   const MOCK_JWT = 'eyJhbGciOiJIUzI1NiJ9.MOCK_TOKEN_' + Date.now() + '.mock_signature';
@@ -27,7 +38,7 @@
   // 监听来自 Background / SidePanel 的请求
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'GET_PINGCODE_JWT') {
-      if (isMockMode()) {
+      if (isMockMode("PingCode")) {
         console.log('[AiTestX BRIDGE MOCK] 返回伪造 JWT');
         sendResponse({ success: true, token: MOCK_JWT });
         return true;
@@ -39,7 +50,7 @@
     }
 
     if (msg.action === 'GET_PINGCODE_USER') {
-      if (isMockMode()) {
+      if (isMockMode("PingCode")) {
         sendResponse({ success: true, user: MOCK_USER });
         return true;
       }
@@ -50,7 +61,7 @@
     }
 
     if (msg.action === 'PING_PINGCODE_HEALTH') {
-      if (isMockMode()) {
+      if (isMockMode("PingCode")) {
         sendResponse({ success: true, code: 200 });
         return true;
       }

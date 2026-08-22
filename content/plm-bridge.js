@@ -9,12 +9,23 @@
   const PLM_BASE = 'https://plm.twsc.com.cn';
 
   // ─── ENV 读取 ───
+  // Fallback: 与 js/config.js DEFAULT_CONFIG 保持一致
+  // 即使 config.js 没注入成功, PingCode/PLM 也默认走 prod, 不会误走 mock
   const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
+    AiTest:   'mock',
+    PingCode: 'prod',
+    PLM:      'prod',
     ENV: 'mock',
     PROD: { PLM_BASE: 'https://plm.twsc.com.cn' },
     MOCK: { PLM_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
+  function isMockMode(system) {
+    const cfg = __AITESTX_CONFIG;
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    if (sys && typeof cfg[sys] === 'string') return cfg[sys] === 'mock';
+    // per-system 字段缺失 → 默认 prod (mock 是主动选择, 不该是默认)
+    return false;
+  }
 
   // ─── Cookie 工具 ───
   function readCookie(name) {
@@ -76,7 +87,7 @@
   // ─── 处理函数 ───
 
   async function handleGetUser() {
-    if (isMockMode()) {
+    if (isMockMode("PLM")) {
       console.log('[AiTestX PLM BRIDGE MOCK] 返回 mock 用户');
       return MOCK_USER;
     }
@@ -123,7 +134,7 @@
   }
 
   async function handleHealth() {
-    if (isMockMode()) return 200;
+    if (isMockMode("PLM")) return 200;
     // 调 transferCommonRest (GET) 看登录态
     const res = await fetch(PLM_BASE + '/yonbip-mm-plmrd/bill/transferCommonRest?serviceCode=plm_base_question_manage&terminalType=1&sbillno=baseQuestionList&locale=zh_CN', {
       method: 'GET',
@@ -144,7 +155,7 @@
   }
 
   async function handleSubmit(payload) {
-    if (isMockMode()) {
+    if (isMockMode("PLM")) {
       console.log('[AiTestX PLM BRIDGE MOCK] mock 提交, payload keys:', Object.keys(payload || {}).join(','));
       return mockSubmitResult();
     }
@@ -196,5 +207,5 @@
     };
   }
 
-  console.log('[AiTestX] PLM bridge loaded, isMock=' + isMockMode());
+  console.log('[AiTestX] PLM bridge loaded, isMock=' + isMockMode("PLM"));
 })();

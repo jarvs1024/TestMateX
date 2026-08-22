@@ -3,13 +3,29 @@
   'use strict';
 
   // ─── ENV 读取 (sidepanel 独立 window) ───
+  // Fallback: 与 js/config.js DEFAULT_CONFIG 保持一致
+  // 即使 config.js 没注入成功, PingCode/PLM 也默认走 prod, 不会误走 mock
   const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
+    AiTest:   'mock',
+    PingCode: 'prod',
+    PLM:      'prod',
     ENV: 'mock',
-    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
-    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
+    PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30', PLM_BASE: 'https://plm.twsc.com.cn' },
+    MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000', PLM_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
-  function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
+  function isMockMode(system) {
+    const cfg = __AITESTX_CONFIG;
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    if (sys && typeof cfg[sys] === 'string') return cfg[sys] === 'mock';
+    // per-system 字段缺失 → 默认 prod (mock 是主动选择, 不该是默认)
+    return false;
+  }
+  function atxBase(system) {
+    const cfg = __AITESTX_CONFIG;
+    const key = { AITEST: 'AITEST_BASE', PINGCODE: 'PINGCODE_BASE', PLM: 'PLM_BASE' }[system] || (system + '_BASE');
+    const sys = { AITEST: 'AiTest', PINGCODE: 'PingCode', PLM: 'PLM' }[system] || system;
+    return isMockMode(sys) ? cfg.MOCK[key] : cfg.PROD[key];
+  }
   console.log('[AiTestX SP] ENV=' + __AITESTX_CONFIG.ENV + ' PINGCODE=' + atxBase('PINGCODE'));
 
   const FORM_FIELDS = {
@@ -56,12 +72,12 @@
     // 在 brand-sub 显示当前环境 (让用户一眼看到这是 mock 还是 prod)
     const sub = document.getElementById('brand-sub');
     if (sub) {
-      sub.textContent = isMockMode() ? '🧪 MOCK 环境' : 'AiTest 至 PingCode';
-      sub.style.color = isMockMode() ? '#dc2626' : '';
-      sub.style.fontWeight = isMockMode() ? '600' : '';
+      sub.textContent = isMockMode("AiTest") ? '🧪 MOCK 环境' : 'AiTest 至 PingCode';
+      sub.style.color = isMockMode("AiTest") ? '#dc2626' : '';
+      sub.style.fontWeight = isMockMode("AiTest") ? '600' : '';
     }
     // 文档 title 也标一下, 方便调试
-    document.title = isMockMode() ? 'AiTestX [MOCK]' : 'AiTestX';
+    document.title = isMockMode("AiTest") ? 'AiTestX [MOCK]' : 'AiTestX';
   }
 
   let lastUrl = '';
@@ -158,7 +174,7 @@
   async function detectAndScan() {
     try {
       // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -173,7 +189,7 @@
       const tab = tabs[0];
       if (dot) dot.className = 'status-dot ok';
       const path = new URL(tab.url).pathname;
-      const labelSuffix = isMockMode() ? ' (Mock)' : '';
+      const labelSuffix = isMockMode("AiTest") ? ' (Mock)' : '';
       const params = new URLSearchParams(tab.url.split('?')[1] || '');
       let pageLabel = '页面';
       if (path.indexOf('library') !== -1) pageLabel = '项目列表';
@@ -236,7 +252,7 @@
   async function scanAllProjects() {
     try {
       // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -265,7 +281,7 @@
     if (!state.currentProject) return;
     try {
       // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -294,7 +310,7 @@
     if (!state.currentProject) return;
     try {
       // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -380,7 +396,7 @@
 
     try {
       // ENV 自适应: mock 模式查 localhost:8000, prod 模式查内网
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -409,7 +425,7 @@
   }
 
   async function refreshExecutions() {
-    const aitestUrlPattern = isMockMode()
+    const aitestUrlPattern = isMockMode("AiTest")
       ? 'http://localhost:8000/*'
       : 'http://10.20.65.23:3000/Dml/AiTest/*';
     const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
@@ -434,7 +450,7 @@
     const btn = document.getElementById('btn-scan');
     if (btn) { btn.disabled = true; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>扫描中...'; }
     try {
-      const aitestUrlPattern = isMockMode()
+      const aitestUrlPattern = isMockMode("AiTest")
         ? 'http://localhost:8000/*'
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
