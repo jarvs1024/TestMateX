@@ -153,6 +153,11 @@ async function handleOpenSidePanel(data) {
 
 async function handleUserLogin() {
   console.log('[AiTestX BG] 开始 PingCode 登录流程...');
+  // 强制重新登录: 清掉所有污染残留 (mock JWT / mock user / 过期 JWT)
+  cachedJWT = null;
+  jwtExpiresAt = 0;
+  cachedUser = null;
+  await chrome.storage.local.remove([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
   let tabs = await chrome.tabs.query({ url: 'http://10.20.24.30/*' });
   let backgroundTab = null;
   let token = null;
@@ -274,16 +279,31 @@ async function checkPingCodeStatus() {
     return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true, mock: true };
   }
 
-  if (cachedJWT && Date.now() < jwtExpiresAt - 60 * 1000) {
+  // 污染检测: 内存里的 JWT/user 是污染数据, 丢弃并清 storage, 强制走真实拉取
+  const inMemoryPolluted = (cachedJWT && /^MOCK_JWT_/.test(cachedJWT)) || (cachedUser && cachedUser.id === 'mock-user-id');
+  if (inMemoryPolluted) {
+    console.warn('[AiTestX BG] 内存残留 mock JWT/user + 当前 PingCode=prod, 清空并强制重连');
+    cachedJWT = null;
+    jwtExpiresAt = 0;
+    cachedUser = null;
+    await chrome.storage.local.remove([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
+  } else if (cachedJWT && Date.now() < jwtExpiresAt - 60 * 1000) {
     return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true };
   }
 
   const stored = await chrome.storage.local.get([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
   if (stored[STORAGE_KEYS.JWT] && stored[STORAGE_KEYS.JWT_EXPIRES] > Date.now() + 60 * 1000) {
-    cachedJWT = stored[STORAGE_KEYS.JWT];
-    jwtExpiresAt = stored[STORAGE_KEYS.JWT_EXPIRES];
-    cachedUser = stored[STORAGE_KEYS.USER];
-    return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true };
+    // storage 二次污染校验
+    const storedPolluted = /^MOCK_JWT_/.test(stored[STORAGE_KEYS.JWT]) || (stored[STORAGE_KEYS.USER] && stored[STORAGE_KEYS.USER].id === 'mock-user-id');
+    if (storedPolluted) {
+      console.warn('[AiTestX BG] storage 残留 mock JWT/user, 清空');
+      await chrome.storage.local.remove([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
+    } else {
+      cachedJWT = stored[STORAGE_KEYS.JWT];
+      jwtExpiresAt = stored[STORAGE_KEYS.JWT_EXPIRES];
+      cachedUser = stored[STORAGE_KEYS.USER];
+      return { authenticated: true, jwt: maskToken(cachedJWT), user: cachedUser, cached: true };
+    }
   }
 
   try {
@@ -693,14 +713,22 @@ class PingCodeClient {
 }
 
 // ─── 启动时恢复状态 ────────────────────────────────────────────────────────
+// 污染检测: 若 storage 残留的是 mock 模式时写入的 JWT/user,
+// 且当前 isMockMode(PingCode)=false (prod), 视为污染, 不加载, 走真实拉取
 (async () => {
   try {
     const stored = await chrome.storage.local.get([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
-    if (stored[STORAGE_KEYS.JWT]) {
-      cachedJWT = stored[STORAGE_KEYS.JWT];
+    const jwt = stored[STORAGE_KEYS.JWT];
+    const user = stored[STORAGE_KEYS.USER];
+    const isPolluted = (jwt && /^MOCK_JWT_/.test(jwt)) || (user && user.id === 'mock-user-id');
+    if (jwt && !isPolluted) {
+      cachedJWT = jwt;
       jwtExpiresAt = stored[STORAGE_KEYS.JWT_EXPIRES] || 0;
-      cachedUser = stored[STORAGE_KEYS.USER];
+      cachedUser = user;
       console.log('[AiTestX BG] Restored JWT');
+    } else if (isPolluted) {
+      console.warn('[AiTestX BG] 检测到污染缓存 (mock JWT/user) + 当前 PingCode=prod, 丢弃并清空 storage');
+      await chrome.storage.local.remove([STORAGE_KEYS.JWT, STORAGE_KEYS.JWT_EXPIRES, STORAGE_KEYS.USER]);
     }
   } catch (e) {
     console.error('[AiTestX BG] Restore failed:', e);

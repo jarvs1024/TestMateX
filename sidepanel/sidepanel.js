@@ -1002,13 +1002,16 @@
   async function handleReauth() {
     showToast('重新鉴权...', 'info');
     try {
-      const res = await chrome.runtime.sendMessage({ action: 'CHECK_PINGCODE_STATUS' });
-      if (res && res.success && res.status && res.status.authenticated) {
-        showToast('已连接', 'success');
+      // 强制重连: USER_LOGIN 内部会清污染缓存 (mock JWT/user), 走真实拉 JWT
+      const res = await chrome.runtime.sendMessage({ action: 'USER_LOGIN' });
+      if (res && res.success) {
+        showToast('已连接 (' + (res.user && (res.user.display_name || res.user.name) || '已登录') + ')', 'success');
       } else {
         showToast(res && res.error || '鉴权失败', 'error');
       }
-    } catch (e) {}
+    } catch (e) {
+      showToast('鉴权失败: ' + e.message, 'error');
+    }
   }
 
   // 内联消息条 (顶栏 inline, 不再是浮层)
