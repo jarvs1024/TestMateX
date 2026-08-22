@@ -32,8 +32,8 @@
   };
 
   let state = {
-    currentProject: null, currentTask: null, currentExecWid: null, executions: [],currentExec: null,
-    failedExecs: [], currentCases: [],
+    currentProject: null, currentTask: null, currentExecWid: null, executions: [], currentExec: null,
+    currentCases: [],
     selectedCases: new Set(), expandedCases: new Set(),
     aiResults: {}, projects: [], tasks: [],
     submitSystem: 'pingcode',  // 'pingcode' | 'plm' | 'both'
@@ -70,7 +70,6 @@
       if (location.href !== lastUrl) {
         lastUrl = location.href;
         state.currentTask = null;
-        state.failedExecs = [];
         state.currentCases = [];
         detectAndScan();
       }
@@ -343,17 +342,19 @@
 
     const es = document.getElementById('exec-select');
     if (es) {
-      if (state.failedExecs && state.failedExecs.length > 0) {
+      if (state.executions && state.executions.length > 0) {
         let esOpts = '<option value="">-- 全部 --</option>';
-        state.failedExecs.forEach(function (e, idx) {
-          esOpts += '<option value="' + e.wid + '">' +
-            (idx + 1) + '. ' + (e.execStartTime || '').substring(0, 16) + ' | ' + (e.executorName || '?') + '</option>';
+        state.executions.forEach(function (e, idx) {
+          const sel = state.currentExecWid === e.wid ? ' selected' : '';
+          esOpts += '<option value="' + e.wid + '"' + sel + '>' +
+            (idx + 1) + '. ' + (e.execName || '?') + ' | ' + (e.executorName || '?') + ' | ' + (e.execStartTime || '').substring(0, 16) + '</option>';
         });
         es.innerHTML = esOpts;
+        if (state.currentExecWid) es.value = String(state.currentExecWid);
         // 问题2: 同时更新顶部 #list-summary 为首个 exec 名称 (避免“未扫描”占位文)
         const summary = document.getElementById('list-summary');
         if (summary) {
-          const e0 = state.failedExecs[0];
+          const e0 = state.executions[0];
           summary.textContent = (e0.execStartTime || '').substring(0, 16) + ' | ' + (e0.executorName || '?');
         }
       } else {
@@ -370,7 +371,6 @@
     const execProjectType = parseInt(opt.dataset.type || '0', 10);
     state.currentProject = { projectName: projectName, execProjectType: execProjectType };
     state.currentTask = null;
-    state.failedExecs = [];
     state.executions = [];
     state.currentExecWid = null;
     state.tasks = [];
@@ -400,8 +400,31 @@
   async function pickProject() {
     await scanAllProjects();
     await scanTasksFromPageDOM();
+    await refreshExecutions();
     renderBreadcrumb();
-    showToast('已刷新 (' + state.projects.length + ' 个项目, ' + state.tasks.length + ' 个任务)', 'success');
+    showToast('已刷新 (' + state.projects.length + ' 个项目, ' + state.tasks.length + ' 个任务, ' + (state.executions ? state.executions.length : 0) + ' 个执行)', 'success');
+  }
+
+  async function refreshExecutions() {
+    const aitestUrlPattern = isMockMode()
+      ? 'http://localhost:8000/*'
+      : 'http://10.20.65.23:3000/Dml/AiTest/*';
+    const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
+    if (!tabs || !tabs.length) return;
+    const tab = tabs[0];
+    const urlParams = new URLSearchParams(tab.url.split('?')[1] || '');
+    const taskId = parseInt(urlParams.get('taskId') || '0', 10);
+    if (!taskId) return;
+    const r = await sendToContentScript(tab.id, 'SCAN_TASK_FAILURES', { taskId: taskId, daysBack: 30 });
+    if (r && r.success && Array.isArray(r.data)) {
+      state.executions = r.data;
+      if (!state.currentExecWid && state.executions.length > 0) {
+        state.currentExecWid = state.executions[0].wid;
+      }
+    } else {
+      state.executions = [];
+    }
+    renderBreadcrumb();
   }
 
   async function scan() {
@@ -423,27 +446,12 @@
         showToast('URL 中未找到 taskId', 'error');
         return;
       }
-      // 步骤1: 扫 task 下的 executions, 填 exec-select 下拉
-      const r0 = await sendToContentScript(tab.id, 'SCAN_TASK_FAILURES', { taskId: urlTaskId, daysBack: 30 });
-      if (r0 && r0.success && Array.isArray(r0.data)) {
-        state.executions = r0.data;
-        renderExecSelect();
-        console.log('[TMX-DBG] scan() executions=' + state.executions.length);
-      } else {
-        state.executions = [];
-        renderExecSelect();
-      }
-      // 默认选中第一个 exec
-      if (!state.currentExecWid && state.executions.length > 0) {
-        state.currentExecWid = state.executions[0].wid;
-      }
-      const es = document.getElementById('exec-select');
-      if (es && state.currentExecWid) es.value = String(state.currentExecWid);
+      // 前置检查: 必须在 [刷新] 后才能扫描
       if (!state.currentExecWid) {
-        showToast('该任务下没有失败执行', 'error');
+        showToast('请先点击 [刷新] 加载执行列表, 再选择执行后扫描', 'error');
         return;
       }
-      // 步骤2: 按选中 exec 拿失败 cases
+      // 按选中 exec 拿失败 cases
       const response = await sendToContentScript(tab.id, 'GET_CASES_FOR_EXEC', { execWid: state.currentExecWid });
       console.log('[TMX-DBG] response.success=' + (response && response.success) + ' cases=' + ((response && response.data && response.data.cases) || []).length);
       if (!response || !response.success) {
@@ -468,21 +476,6 @@
     } finally {
       if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>扫描'; }
     }
-  }
-
-  function renderExecSelect() {
-    const es = document.getElementById('exec-select');
-    if (!es) return;
-    if (!state.executions || state.executions.length === 0) {
-      es.innerHTML = '<option value="">-- 选执行 --</option>';
-      return;
-    }
-    let opts = '<option value="">-- 选执行 --</option>';
-    state.executions.forEach(function (e, idx) {
-      const sel = state.currentExecWid === e.wid ? ' selected' : '';
-      opts += '<option value="' + e.wid + '"' + sel + '>' + (idx + 1) + '. ' + (e.execName || '?') + ' | ' + (e.executorName || '?') + ' | ' + (e.execStartTime || '?').substring(0, 16) + '</option>';
-    });
-    es.innerHTML = opts;
   }
 
   function renderCases() {
