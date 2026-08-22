@@ -9,12 +9,12 @@
   const PLM_BASE = 'https://plm.twsc.com.cn';
 
   // ─── ENV 读取 ───
-  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+  const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
     ENV: 'mock',
     PROD: { PLM_BASE: 'https://plm.twsc.com.cn' },
     MOCK: { PLM_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
 
   // ─── Cookie 工具 ───
   function readCookie(name) {
@@ -50,7 +50,7 @@
 
   // ─── 消息监听 ───
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    console.log('[TestMateX PLM BRIDGE] message:', msg.action);
+    console.log('[AiTestX PLM BRIDGE] message:', msg.action);
 
     switch (msg.action) {
       case 'GET_PLM_USER':
@@ -77,7 +77,7 @@
 
   async function handleGetUser() {
     if (isMockMode()) {
-      console.log('[TestMateX PLM BRIDGE MOCK] 返回 mock 用户');
+      console.log('[AiTestX PLM BRIDGE MOCK] 返回 mock 用户');
       return MOCK_USER;
     }
 
@@ -111,7 +111,7 @@
         }
       }
     } catch (e) {
-      console.warn('[TestMateX PLM] DOM 抓 username 失败:', e);
+      console.warn('[AiTestX PLM] DOM 抓 username 失败:', e);
     }
 
     return {
@@ -145,7 +145,7 @@
 
   async function handleSubmit(payload) {
     if (isMockMode()) {
-      console.log('[TestMateX PLM BRIDGE MOCK] mock 提交, payload keys:', Object.keys(payload || {}).join(','));
+      console.log('[AiTestX PLM BRIDGE MOCK] mock 提交, payload keys:', Object.keys(payload || {}).join(','));
       return mockSubmitResult();
     }
 
@@ -166,7 +166,7 @@
     };
     if (xsrf) headers['X-Csrf-Token'] = xsrf;
 
-    console.log('[TestMateX PLM] POST save url:', url);
+    console.log('[AiTestX PLM] POST save url:', url);
 
     const res = await fetch(url, {
       method: 'POST',
@@ -196,5 +196,5 @@
     };
   }
 
-  console.log('[TestMateX] PLM bridge loaded, isMock=' + isMockMode());
+  console.log('[AiTestX] PLM bridge loaded, isMock=' + isMockMode());
 })();

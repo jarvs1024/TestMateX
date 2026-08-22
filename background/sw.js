@@ -7,7 +7,7 @@ const AITEST_BASE = 'http://10.20.65.23:3000';
 const PLM_BASE = 'https://plm.twsc.com.cn';
 
 // ─── ENV 配置 (镜像 js/config.js, 兼容 classic SW 独立 global) ─────────────
-const __TESTMATEX_CONFIG = {
+const __AITESTX_CONFIG = {
   ENV: 'prod',  // 'mock' | 'prod'
   PROD: {
     AITEST_BASE: 'http://10.20.65.23:3000',
@@ -20,9 +20,9 @@ const __TESTMATEX_CONFIG = {
     PLM_BASE: 'http://localhost:8000',
   },
 };
-function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
-function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
-console.log('[TestMateX BG] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE') + ' PLM=' + tmxBase('PLM'));
+function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
+function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
+console.log('[AiTestX BG] ENV=' + __AITESTX_CONFIG.ENV + ' PINGCODE=' + atxBase('PINGCODE') + ' PLM=' + atxBase('PLM'));
 
 const STORAGE_KEYS = {
   PENDING_DATA: 'pendingData',
@@ -58,11 +58,11 @@ let jwtExpiresAt = 0;
 let cachedUser = null;
 let swReady = true;
 
-console.log('[TestMateX BG] Service Worker V2 started, ready=' + swReady);
+console.log('[AiTestX BG] Service Worker V2 started, ready=' + swReady);
 
 // ─── 消息处理 ────────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log('[TestMateX BG] message:', msg.action);
+  console.log('[AiTestX BG] message:', msg.action);
 
   switch (msg.action) {
     case 'OPEN_SIDEPANEL_WITH_DATA':
@@ -137,14 +137,14 @@ async function handleOpenSidePanel(data) {
 }
 
 async function handleUserLogin() {
-  console.log('[TestMateX BG] 开始 PingCode 登录流程...');
+  console.log('[AiTestX BG] 开始 PingCode 登录流程...');
   let tabs = await chrome.tabs.query({ url: 'http://10.20.24.30/*' });
   let backgroundTab = null;
   let token = null;
   let user = null;
 
   if (tabs.length === 0) {
-    console.log('[TestMateX BG] 未找到 PingCode tab, 创建后台 tab...');
+    console.log('[AiTestX BG] 未找到 PingCode tab, 创建后台 tab...');
     try {
       backgroundTab = await chrome.tabs.create({ url: 'http://10.20.24.30/', active: false });
     } catch (e) {
@@ -155,16 +155,16 @@ async function handleUserLogin() {
     for (let i = 0; i < 15; i++) {
       await new Promise(r => setTimeout(r, 1000));
       try {
-        console.log('[TestMateX BG] 尝试获取 JWT (' + (i + 1) + '/15)...');
+        console.log('[AiTestX BG] 尝试获取 JWT (' + (i + 1) + '/15)...');
         const response = await chrome.tabs.sendMessage(backgroundTab.id, { action: 'GET_PINGCODE_JWT' });
         if (response && response.success) {
           token = response.token;
-          console.log('[TestMateX BG] JWT 获取成功');
+          console.log('[AiTestX BG] JWT 获取成功');
           const meRes = await chrome.tabs.sendMessage(backgroundTab.id, { action: 'GET_PINGCODE_USER' });
           if (meRes && meRes.success) user = meRes.user;
           break;
         } else if (response && !response.success) {
-          console.error('[TestMateX BG] JWT 获取失败:', response.error);
+          console.error('[AiTestX BG] JWT 获取失败:', response.error);
           // 如果是登录问题，提前退出
           if (response.error && (response.error.indexOf('未登录') !== -1 || response.error.indexOf('401') !== -1 || response.error.indexOf('403') !== -1)) {
             throw new Error('PingCode 未登录。请先在浏览器打开 http://10.20.24.30/ 并登录');
@@ -185,19 +185,19 @@ async function handleUserLogin() {
       throw new Error('PingCode 自动登录失败。请先在浏览器手动打开 http://10.20.24.30/ 登录一次');
     }
   } else {
-    console.log('[TestMateX BG] 找到已有 PingCode tab, 直接获取 JWT...');
+    console.log('[AiTestX BG] 找到已有 PingCode tab, 直接获取 JWT...');
     const tab = tabs[0];
     const response = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_JWT' });
     if (!response || !response.success) {
       const errorMsg = (response && response.error) || '未知';
-      console.error('[TestMateX BG] JWT 获取失败:', errorMsg);
+      console.error('[AiTestX BG] JWT 获取失败:', errorMsg);
       if (errorMsg.indexOf('未登录') !== -1 || errorMsg.indexOf('401') !== -1 || errorMsg.indexOf('403') !== -1) {
         throw new Error('PingCode 未登录或会话已过期。请重新登录 http://10.20.24.30/');
       }
       throw new Error('拿 JWT 失败：' + errorMsg);
     }
     token = response.token;
-    console.log('[TestMateX BG] JWT 获取成功');
+    console.log('[AiTestX BG] JWT 获取成功');
     const meRes = await chrome.tabs.sendMessage(tab.id, { action: 'GET_PINGCODE_USER' });
     if (meRes && meRes.success) user = meRes.user;
   }
@@ -212,7 +212,7 @@ async function handleUserLogin() {
     [STORAGE_KEYS.USER]: cachedUser,
   });
 
-  console.log('[TestMateX BG] 登录完成, 用户:', user ? (user.display_name || user.name || '未知') : '未知');
+  console.log('[AiTestX BG] 登录完成, 用户:', user ? (user.display_name || user.name || '未知') : '未知');
 
   return {
     jwt: maskToken(cachedJWT),
@@ -282,14 +282,14 @@ async function checkPingCodeStatus() {
 async function handleSubmit(payload) {
   // ── MOCK: 不走真实 PingCode, 返回伪造提单结果 ──
   if (isMockMode()) {
-    console.log('[TestMateX BG MOCK] 拦截提单, payload keys:', Object.keys(payload || {}).join(','));
+    console.log('[AiTestX BG MOCK] 拦截提单, payload keys:', Object.keys(payload || {}).join(','));
     await new Promise(r => setTimeout(r, 600));  // 模拟网络延迟
     const mockBugId = 1000 + Math.floor(Math.random() * 9000);
     const projectKey = (await loadConfig()).projectKey;
     return {
       bugId: String(mockBugId),
       wholeIdentifier: 'S3100V1R1-' + mockBugId,
-      bugUrl: tmxBase('PINGCODE') + '/mock-pingcode/bug/' + mockBugId,
+      bugUrl: atxBase('PINGCODE') + '/mock-pingcode/bug/' + mockBugId,
       raw: { mock: true, payload_keys: Object.keys(payload || {}), _id: 'mock-' + mockBugId, identifier: String(mockBugId), whole_identifier: 'S3100V1R1-' + mockBugId, projectKey: projectKey },
     };
   }
@@ -314,13 +314,13 @@ async function handleSubmit(payload) {
 async function handleSubmitToPLM(payload) {
   // MOCK: 返回伪造 PLM 工单号
   if (isMockMode()) {
-    console.log('[TestMateX BG MOCK PLM] 拦截 PLM 提单, payload keys:', Object.keys(payload || {}).join(','));
+    console.log('[AiTestX BG MOCK PLM] 拦截 PLM 提单, payload keys:', Object.keys(payload || {}).join(','));
     await new Promise(r => setTimeout(r, 600));
     const plmId = 5000 + Math.floor(Math.random() * 9000);
     return {
       bugId: String(plmId),
       wholeIdentifier: 'PLM-' + plmId,
-      bugUrl: tmxBase('PLM') + '/mock-plm/bug/' + plmId,
+      bugUrl: atxBase('PLM') + '/mock-plm/bug/' + plmId,
       raw: { mock: true, system: 'plm', payload_keys: Object.keys(payload || {}), _id: 'mock-plm-' + plmId, identifier: 'PLM-' + plmId },
     };
   }
@@ -339,7 +339,7 @@ async function handleSubmitToPLM(payload) {
   if (!r || !r.code || !r.id) {
     throw new Error('PLM 响应缺工单号或 ID: ' + JSON.stringify(r));
   }
-  const detailUrl = tmxBase('PLM')
+  const detailUrl = atxBase('PLM')
     + '/yonbip-mm-plmrd/bill/transferCommonRest'
     + '?serviceCode=plm_base_question_manage'
     + '&terminalType=1'
@@ -434,7 +434,7 @@ async function callPlmBridge(msg) {
     let tabs = await chrome.tabs.query({ url: 'https://plm.twsc.com.cn/*' });
     let plmTab = null;
     if (tabs.length === 0) {
-      console.log('[TestMateX BG] 未找到 PLM tab, 创建后台 tab...');
+      console.log('[AiTestX BG] 未找到 PLM tab, 创建后台 tab...');
       plmTab = await chrome.tabs.create({ url: 'https://plm.twsc.com.cn/', active: false });
       for (let i = 0; i < 15; i++) {
         await new Promise(r => setTimeout(r, 1000));
@@ -685,10 +685,10 @@ class PingCodeClient {
       cachedJWT = stored[STORAGE_KEYS.JWT];
       jwtExpiresAt = stored[STORAGE_KEYS.JWT_EXPIRES] || 0;
       cachedUser = stored[STORAGE_KEYS.USER];
-      console.log('[TestMateX BG] Restored JWT');
+      console.log('[AiTestX BG] Restored JWT');
     }
   } catch (e) {
-    console.error('[TestMateX BG] Restore failed:', e);
+    console.error('[AiTestX BG] Restore failed:', e);
   }
 })();
 
@@ -697,13 +697,13 @@ chrome.action.onClicked.addListener(async (tab) => {
   try {
     await chrome.sidePanel.open({ tabId: tab.id });
   } catch (e) {
-    console.error('[TestMateX BG] sidePanel.open failed:', e);
+    console.error('[AiTestX BG] sidePanel.open failed:', e);
   }
 });
 
 // 保持 SW 活跃: 每 25 秒心跳一次
 setInterval(() => {
-  console.log('[TestMateX BG] heartbeat', Date.now());
+  console.log('[AiTestX BG] heartbeat', Date.now());
 }, 25 * 1000);
 
-console.log('[TestMateX BG] End of script, ready');
+console.log('[AiTestX BG] End of script, ready');

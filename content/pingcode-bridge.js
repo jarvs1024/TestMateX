@@ -8,12 +8,12 @@
   const PINGCODE_BASE = 'http://10.20.24.30';
 
   // ─── ENV 读取 ───
-  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+  const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
     ENV: 'mock',
     PROD: { PINGCODE_BASE: 'http://10.20.24.30' },
     MOCK: { PINGCODE_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
+  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
 
   // ─── Mock 响应 ───
   const MOCK_JWT = 'eyJhbGciOiJIUzI1NiJ9.MOCK_TOKEN_' + Date.now() + '.mock_signature';
@@ -21,14 +21,14 @@
     id: 'mock-user-id',
     name: 'mock_user',
     display_name: 'Mock 测试员',
-    email: 'mock@testmatex.local',
+    email: 'mock@aitestx.local',
   };
 
   // 监听来自 Background / SidePanel 的请求
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'GET_PINGCODE_JWT') {
       if (isMockMode()) {
-        console.log('[TestMateX BRIDGE MOCK] 返回伪造 JWT');
+        console.log('[AiTestX BRIDGE MOCK] 返回伪造 JWT');
         sendResponse({ success: true, token: MOCK_JWT });
         return true;
       }
@@ -64,12 +64,12 @@
   });
 
   async function fetchAccessToken() {
-    console.log('[TestMateX] 尝试获取 PingCode JWT...');
+    console.log('[AiTestX] 尝试获取 PingCode JWT...');
     const res = await fetch('/api/typhon/account/access-token', {
       credentials: 'include',
       headers: { 'Referer': window.location.href },
     });
-    console.log('[TestMateX] access-token 响应:', res.status, res.statusText);
+    console.log('[AiTestX] access-token 响应:', res.status, res.statusText);
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) {
         throw new Error('PingCode 未登录或会话已过期 (HTTP ' + res.status + ')');
@@ -77,14 +77,14 @@
       throw new Error('HTTP ' + res.status + ' ' + res.statusText);
     }
     const data = await res.json();
-    console.log('[TestMateX] access-token 返回:', data.code, data.msg || '');
+    console.log('[AiTestX] access-token 返回:', data.code, data.msg || '');
     if (data.code !== 200) {
       throw new Error('access-token API 返回 ' + data.code + ': ' + (data.msg || ''));
     }
     if (!data.data?.value) {
       throw new Error('access-token 响应中无 value 字段');
     }
-    console.log('[TestMateX] JWT 获取成功');
+    console.log('[AiTestX] JWT 获取成功');
     return data.data.value;
   }
 
@@ -99,5 +99,5 @@
     return data.data.me;
   }
 
-  console.log('[TestMateX] PingCode bridge V2 loaded');
+  console.log('[AiTestX] PingCode bridge V2 loaded');
 })();

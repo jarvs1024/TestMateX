@@ -1,11 +1,11 @@
 # Mock Server - 本地靶场
 
-> 用于在无内网 / 无 PingCode 权限时, 本地开发 / 测试 TestMateX 浏览器插件。
+> 用于在无内网 / 无 PingCode 权限时, 本地开发 / 测试 AiTestX 浏览器插件。
 
 ## 启动
 
 ```bash
-cd /Users/jarvs/TestMateX/mock-server
+cd /Users/jarvs/AiTestX/mock-server
 python3 -m http.server 8000
 ```
 
@@ -23,7 +23,7 @@ python3 -m http.server 8000
 
 ## ENV 切换
 
-`/Users/jarvs/TestMateX/js/config.js` 第 11 行:
+`/Users/jarvs/AiTestX/js/config.js` 第 11 行:
 
 ```js
 ENV: 'mock',   // 'mock' = 走 mock 数据; 'prod' = 走真实抓取 / fetch

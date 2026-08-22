@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "TestMateX - 自动化分析提单助手",
+  "name": "AiTestX - 自动化分析提单助手",
   "version": "0.1.0",
   "description": "AiTest 自动化测试失败用例分析与一键提单 (PingCode / PLM)",
   "minimum_chrome_version": "114",
@@ -64,7 +64,7 @@
     "default_path": "sidepanel/sidepanel.html"
   },
   "action": {
-    "default_title": "TestMateX - 自动化分析提单",
+    "default_title": "AiTestX - 自动化分析提单",
     "default_icon": {
       "16": "icons/16.png",
       "48": "icons/48.png",

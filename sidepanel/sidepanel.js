@@ -3,14 +3,14 @@
   'use strict';
 
   // ─── ENV 读取 (sidepanel 独立 window) ───
-  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+  const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
     ENV: 'mock',
     PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
     MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
-  function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
-  console.log('[TestMateX SP] ENV=' + __TESTMATEX_CONFIG.ENV + ' PINGCODE=' + tmxBase('PINGCODE'));
+  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
+  function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
+  console.log('[AiTestX SP] ENV=' + __AITESTX_CONFIG.ENV + ' PINGCODE=' + atxBase('PINGCODE'));
 
   const FORM_FIELDS = {
     title: 'edit-title', stage: 'edit-stage',
@@ -40,7 +40,7 @@
   };
 
   function start() {
-    console.log('[TestMateX] V23 + ENV Adapter, ENV=' + __TESTMATEX_CONFIG.ENV);
+    console.log('[AiTestX] V23 + ENV Adapter, ENV=' + __AITESTX_CONFIG.ENV);
     bindEvents();
     setInterval(pollPingCode, 8000);
     setTimeout(pollPingCode, 200);
@@ -60,7 +60,7 @@
       sub.style.fontWeight = isMockMode() ? '600' : '';
     }
     // 文档 title 也标一下, 方便调试
-    document.title = isMockMode() ? 'TestMateX [MOCK]' : 'TestMateX';
+    document.title = isMockMode() ? 'AiTestX [MOCK]' : 'AiTestX';
   }
 
   let lastUrl = '';
@@ -112,7 +112,7 @@
         rb.addEventListener('change', function () {
           if (rb.checked) {
             state.submitSystem = rb.value;
-            console.log('[TestMateX] 切换提单系统:', state.submitSystem);
+            console.log('[AiTestX] 切换提单系统:', state.submitSystem);
           }
         });
       });
@@ -194,7 +194,7 @@
         try {
           await scanAllProjects();
         } catch (e) {
-          console.error('[TestMateX] scanAllProjects 失败:', e);
+          console.error('[AiTestX] scanAllProjects 失败:', e);
         }
         if (state.currentProject && !state.projects.find(function (p) { return p.projectName === state.currentProject.projectName; })) {
           state.projects.unshift({
@@ -216,7 +216,7 @@
             await scanTasksFromPageDOM();
           }
         } catch (e) {
-          console.error('[TestMateX] 获取任务列表失败:', e);
+          console.error('[AiTestX] 获取任务列表失败:', e);
         }
       }
 
@@ -226,7 +226,7 @@
 
       renderBreadcrumb();
     } catch (e) {
-      console.error('[TestMateX] detectAndScan:', e);
+      console.error('[AiTestX] detectAndScan:', e);
       renderBreadcrumb(); // 确保即使出错也渲染
     }
   }
@@ -239,22 +239,22 @@
         : 'http://10.20.65.23:3000/Dml/AiTest/*';
       const tabs = await chrome.tabs.query({ url: aitestUrlPattern });
       if (!tabs || !tabs.length) {
-        console.warn('[TestMateX] 未找到 AiTest tab');
+        console.warn('[AiTestX] 未找到 AiTest tab');
         return;
       }
       const response = await sendToContentScript(tabs[0].id, 'SCAN_PROJECTS_LIST', {});
       if (response && response.success && response.data) {
         state.projects = response.data;
-        console.log('[TestMateX] 获取到', state.projects.length, '个项目');
+        console.log('[AiTestX] 获取到', state.projects.length, '个项目');
       } else if (response && response.__error) {
-        console.error('[TestMateX] scanAllProjects 错误:', response.__error);
+        console.error('[AiTestX] scanAllProjects 错误:', response.__error);
         showToast('获取项目列表失败: ' + response.__error, 'error');
       } else if (response && !response.success) {
-        console.error('[TestMateX] scanAllProjects 失败:', response.error);
+        console.error('[AiTestX] scanAllProjects 失败:', response.error);
         showToast('获取项目列表失败: ' + (response.error || '未知'), 'error');
       }
     } catch (e) {
-      console.error('[TestMateX] scanAllProjects 异常:', e);
+      console.error('[AiTestX] scanAllProjects 异常:', e);
       showToast('获取项目列表异常: ' + e.message, 'error');
     }
   }
@@ -284,7 +284,7 @@
         state.tasks = tasks;
       }
     } catch (e) {
-      console.error('[TestMateX] scanTasksFromPageDOM:', e);
+      console.error('[AiTestX] scanTasksFromPageDOM:', e);
     }
   }
 
@@ -309,16 +309,16 @@
           return tb - ta;
         });
         state.tasks = tasks;
-        console.log('[TestMateX] 获取到', state.tasks.length, '个任务');
+        console.log('[AiTestX] 获取到', state.tasks.length, '个任务');
       } else if (response && response.__error) {
-        console.error('[TestMateX] scanTasksViaAPI 错误:', response.__error);
+        console.error('[AiTestX] scanTasksViaAPI 错误:', response.__error);
         showToast('获取任务列表失败: ' + response.__error, 'error');
       } else if (response && !response.success) {
-        console.error('[TestMateX] scanTasksViaAPI 失败:', response.error);
+        console.error('[AiTestX] scanTasksViaAPI 失败:', response.error);
         showToast('获取任务列表失败: ' + (response.error || '未知'), 'error');
       }
     } catch (e) {
-      console.error('[TestMateX] scanTasksViaAPI:', e);
+      console.error('[AiTestX] scanTasksViaAPI:', e);
     }
   }
 
@@ -615,23 +615,23 @@
   }
 
   function gotoEdit() {
-    console.log('[TestMateX] gotoEdit 被调, selectedCases.size=', state.selectedCases.size, 'currentCases.length=', state.currentCases.length);
+    console.log('[AiTestX] gotoEdit 被调, selectedCases.size=', state.selectedCases.size, 'currentCases.length=', state.currentCases.length);
     try {
       if (state.selectedCases.size === 0) {
-        console.warn('[TestMateX] gotoEdit: 未选用例');
+        console.warn('[AiTestX] gotoEdit: 未选用例');
         showToast('请先选择用例', 'error');
         return;
       }
-      console.log('[TestMateX] gotoEdit: 调 prefillForm');
+      console.log('[AiTestX] gotoEdit: 调 prefillForm');
       prefillForm();
-      console.log('[TestMateX] gotoEdit: prefillForm 完成, 切页面');
+      console.log('[AiTestX] gotoEdit: prefillForm 完成, 切页面');
       const pageList = document.getElementById('page-list');
       const pageEdit = document.getElementById('page-edit');
-      console.log('[TestMateX] gotoEdit: 元素存在?', !!pageList, !!pageEdit);
+      console.log('[AiTestX] gotoEdit: 元素存在?', !!pageList, !!pageEdit);
       switchPage('page-edit');
-      console.log('[TestMateX] gotoEdit: 完成');
+      console.log('[AiTestX] gotoEdit: 完成');
     } catch (err) {
-      console.error('[TestMateX] gotoEdit 异常:', err);
+      console.error('[AiTestX] gotoEdit 异常:', err);
       showToast('跳页失败: ' + err.message, 'error');
     }
   }
@@ -705,7 +705,7 @@
       // 切换页面
       switchPage('page-success');
     } catch (err) {
-      console.error('[TestMateX] gotoSuccess 异常:', err);
+      console.error('[AiTestX] gotoSuccess 异常:', err);
     }
   }
 
@@ -1000,7 +1000,7 @@
 
               // 第一次失败 + 注入配额内 → 强制注入 config + extractor, 然后重试 sendMessage
               if (_injectAttempts[tabId] <= 1) {
-                console.warn('[TestMateX] content script 未注入, 强制注入并重试:', action, 'tabId=' + tabId);
+                console.warn('[AiTestX] content script 未注入, 强制注入并重试:', action, 'tabId=' + tabId);
                 // 显式 ISOLATED world, 确保与 manifest content_scripts 同一个隔离世界 (listener 才能被 sendMessage 触发)
                 chrome.scripting.executeScript({
                   target: { tabId: tabId },
@@ -1008,19 +1008,19 @@
                   world: 'ISOLATED'
                 }, function (execResults) {
                   if (chrome.runtime.lastError) {
-                    console.error('[TestMateX] force-inject 失败:', chrome.runtime.lastError.message, '— 不再 retry, 直接报错');
+                    console.error('[AiTestX] force-inject 失败:', chrome.runtime.lastError.message, '— 不再 retry, 直接报错');
                     resolve({ __error: 'force-inject 失败: ' + chrome.runtime.lastError.message });
                     return;
                   }
-                  console.log('[TestMateX] force-inject 成功, execResults=', execResults, '— 等 800ms 让 listener 注册');
+                  console.log('[AiTestX] force-inject 成功, execResults=', execResults, '— 等 800ms 让 listener 注册');
                   // 等长一点 (800ms) 让 IIFE + onMessage 注册完成
                   setTimeout(function () {
                     chrome.tabs.sendMessage(tabId, { action: action, opts: params }, function (retryResp) {
                       if (chrome.runtime.lastError) {
-                        console.error('[TestMateX] force-inject 后仍失败:', chrome.runtime.lastError.message);
+                        console.error('[AiTestX] force-inject 后仍失败:', chrome.runtime.lastError.message);
                         resolve({ __error: 'Content Script 注入后仍无响应: ' + chrome.runtime.lastError.message });
                       } else {
-                        console.log('[TestMateX] force-inject 后 sendMessage 成功');
+                        console.log('[AiTestX] force-inject 后 sendMessage 成功');
                         resolve(retryResp || {});
                       }
                     });
@@ -1031,19 +1031,19 @@
 
               // 注入后仍失败, 走原 retry 逻辑 (但只 2 次, 避免无限等)
               if (retries < 2) {
-                console.warn('[TestMateX] sendMessage 重试 (' + (retries + 1) + '/2):', action);
+                console.warn('[AiTestX] sendMessage 重试 (' + (retries + 1) + '/2):', action);
                 setTimeout(function () {
                   sendToContentScript(tabId, action, params, retries + 1).then(resolve);
                 }, 800 * (retries + 1));
                 return;
               }
 
-              console.error('[TestMateX] sendMessage 最终失败:', msg);
+              console.error('[AiTestX] sendMessage 最终失败:', msg);
               resolve({ __error: 'Content Script 未注入: ' + msg });
               return;
             }
             // 其他错误 (页面关闭 / 权限等)
-            console.error('[TestMateX] sendMessage 错误:', msg);
+            console.error('[AiTestX] sendMessage 错误:', msg);
             resolve({ __error: 'sendMessage 错误: ' + msg });
           } else {
             // 成功: 重置注入计数 (让后续 tab 操作也能 force-inject)
@@ -1052,7 +1052,7 @@
           }
         });
       } catch (e) {
-        console.error('[TestMateX] sendMessage 异常:', e);
+        console.error('[AiTestX] sendMessage 异常:', e);
         resolve({ __error: 'sendMessage 异常: ' + e.message });
       }
     });

@@ -1,7 +1,7 @@
 // js/config.js V1
-// TestMateX 全局环境配置
+// AiTestX 全局环境配置
 // 设计: IIFE + window 全局变量, 避开 MV3 content_script / classic SW 对 ES module 的兼容性陷阱
-// 优先级: 已注入的 __TESTMATEX_CONFIG > 本文件默认配置
+// 优先级: 已注入的 __AITESTX_CONFIG > 本文件默认配置
 
 (function (root) {
   'use strict';
@@ -29,18 +29,18 @@
   };
 
   // 保护: 若已有配置 (例如 sidepanel 二次打开), 不覆盖
-  root.__TESTMATEX_CONFIG = root.__TESTMATEX_CONFIG || DEFAULT_CONFIG;
+  root.__AITESTX_CONFIG = root.__AITESTX_CONFIG || DEFAULT_CONFIG;
 
   // 便捷访问器
   root.TMX = root.TMX || {};
-  root.TMX.isMock = function () { return root.__TESTMATEX_CONFIG.ENV === 'mock'; };
-  root.TMX.isProd = function () { return root.__TESTMATEX_CONFIG.ENV === 'prod'; };
+  root.TMX.isMock = function () { return root.__AITESTX_CONFIG.ENV === 'mock'; };
+  root.TMX.isProd = function () { return root.__AITESTX_CONFIG.ENV === 'prod'; };
   root.TMX.base = function (kind) {
-    const cfg = root.__TESTMATEX_CONFIG;
+    const cfg = root.__AITESTX_CONFIG;
     return cfg.ENV === 'mock' ? cfg.MOCK[kind + '_BASE'] : cfg.PROD[kind + '_BASE'];
   };
 
-  console.log('[TestMateX CFG] ENV=' + root.__TESTMATEX_CONFIG.ENV +
+  console.log('[AiTestX CFG] ENV=' + root.__AITESTX_CONFIG.ENV +
     ' AITEST=' + root.TMX.base('AITEST') +
     ' PINGCODE=' + root.TMX.base('PINGCODE'));
 })(typeof window !== 'undefined' ? window : self);

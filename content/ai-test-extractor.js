@@ -1,17 +1,17 @@
 // content/ai-test-extractor.js V18 (修复消息参数读取)
 (function () {
-  if (window.__testmatex_injected) return;
-  window.__testmatex_injected = true;
+  if (window.__aitestx_injected) return;
+  window.__aitestx_injected = true;
   const AITEST_BASE = 'http://10.20.65.23:3000';
 
   // ─── ENV 读取 (content script 上下文) ───
-  const __TESTMATEX_CONFIG = window.__TESTMATEX_CONFIG || {
+  const __AITESTX_CONFIG = window.__AITESTX_CONFIG || {
     ENV: 'mock',
     PROD: { AITEST_BASE: 'http://10.20.65.23:3000', PINGCODE_BASE: 'http://10.20.24.30' },
     MOCK: { AITEST_BASE: 'http://localhost:8000',  PINGCODE_BASE: 'http://localhost:8000' },
   };
-  function isMockMode() { return __TESTMATEX_CONFIG.ENV === 'mock'; }
-  function tmxBase(kind) { return isMockMode() ? __TESTMATEX_CONFIG.MOCK[kind + '_BASE'] : __TESTMATEX_CONFIG.PROD[kind + '_BASE']; }
+  function isMockMode() { return __AITESTX_CONFIG.ENV === 'mock'; }
+  function atxBase(kind) { return isMockMode() ? __AITESTX_CONFIG.MOCK[kind + '_BASE'] : __AITESTX_CONFIG.PROD[kind + '_BASE']; }
 
   // ─── Mock 数据源 ───
   const MOCK_TASK_ID = 9999;
@@ -31,7 +31,7 @@
   };
   const AITEST_API = AITEST_BASE + '/api/automation';
   function mockAiTestApi(endpoint, body) {
-    console.log('[TestMateX MOCK] aiTestApi', endpoint, body || '');
+    console.log('[AiTestX MOCK] aiTestApi', endpoint, body || '');
     const e = endpoint.replace(/^\//, '');
     if (e === 'getExecProjectList') {
       return { code: 200, data: { project_list: [
@@ -150,12 +150,12 @@
     return { totalCount: tasks.length, tasks: tasks };
   }
   async function scanProjectsList() {
-    console.log('[TestMateX] scanProjectsList 开始, 当前页面:', detectPage(), 'mock=' + isMockMode());
+    console.log('[AiTestX] scanProjectsList 开始, 当前页面:', detectPage(), 'mock=' + isMockMode());
     try {
       // 走 aiTestApi (mock 模式下自动短路到 mockAiTestApi, prod 模式下走真实 fetch + token 校验)
       const data = await aiTestApi('/getExecProjectList', {});
       const projects = (data.data && data.data.project_list) || [];
-      console.log('[TestMateX] API 返回', projects.length, '个项目');
+      console.log('[AiTestX] API 返回', projects.length, '个项目');
       return projects.map(function (p) {
         return {
           name: p.projectName,
@@ -166,14 +166,14 @@
         };
       });
     } catch (e) {
-      console.error('[TestMateX] getExecProjectList API 失败:', e.message);
+      console.error('[AiTestX] getExecProjectList API 失败:', e.message);
       if (detectPage() !== 'LIBRARY') {
-        console.error('[TestMateX] 当前不是 library 页, 无法 DOM 回退');
+        console.error('[AiTestX] 当前不是 library 页, 无法 DOM 回退');
         throw new Error('请在 library 页打开');
       }
-      console.log('[TestMateX] 回退到 DOM 爬取...');
+      console.log('[AiTestX] 回退到 DOM 爬取...');
       const rows = document.querySelectorAll('tr.ant-table-row');
-      console.log('[TestMateX] DOM 找到', rows.length, '行');
+      console.log('[AiTestX] DOM 找到', rows.length, '行');
       const projects = [];
       for (let i = 0; i < rows.length; i++) {
         const link = rows[i].querySelector('a[href*="automationManage-task"]');
@@ -190,7 +190,7 @@
           lastUpdate: cells[2] ? cells[2].textContent.trim() : '',
         });
       }
-      console.log('[TestMateX] DOM 爬取到', projects.length, '个项目');
+      console.log('[AiTestX] DOM 爬取到', projects.length, '个项目');
       return projects;
     }
   }
@@ -238,7 +238,7 @@
   }
   async function scanTaskFailures(taskId, daysBack) {
     daysBack = daysBack || 7;
-    console.log('[TestMateX] scanTaskFailures:', { taskId: taskId, daysBack: daysBack, isMock: isMockMode() });
+    console.log('[AiTestX] scanTaskFailures:', { taskId: taskId, daysBack: daysBack, isMock: isMockMode() });
     const data = await aiTestApi('/getExecList', {
       search: '',
       filters: { executorName: [], result: [] },
@@ -249,7 +249,7 @@
       sorters: { execTotalTime: 0 },
     });
     const execList = (data.data && data.data.execList) || [];
-    console.log('[TestMateX] scanTaskFailures execList:', execList.length, '条');
+    console.log('[AiTestX] scanTaskFailures execList:', execList.length, '条');
     let failedExecs = execList.filter(function (e) { return e.result === 3; });
     if (daysBack > 0) {
       const cutoff = Date.now() - daysBack * 86400000;
@@ -331,7 +331,7 @@
     };
   }
   function mockExtractFailureCase() {
-    console.log('[TestMateX MOCK] extractFailureCase');
+    console.log('[AiTestX MOCK] extractFailureCase');
     return {
       source: 'aitest-mock',
       taskId: MOCK_TASK_ID,
@@ -378,17 +378,17 @@
     return document.title || '未知任务';
   }
   function injectButton() {
-    if (document.getElementById('testmatex-trigger-btn')) return;
+    if (document.getElementById('aitestx-trigger-btn')) return;
     if (!shouldInjectButton()) return;
     const btn = document.createElement('button');
-    btn.id = 'testmatex-trigger-btn';
-    btn.className = 'testmatex-floating-btn';
-    btn.innerHTML = '<span class="testmatex-icon">🚀</span><span>自动化分析与提单</span>';
-    btn.title = 'TestMateX - 自动化分析提单';
+    btn.id = 'aitestx-trigger-btn';
+    btn.className = 'aitestx-floating-btn';
+    btn.innerHTML = '<span class="aitestx-icon">🚀</span><span>自动化分析与提单</span>';
+    btn.title = 'AiTestX - 自动化分析提单';
     btn.addEventListener('click', async function () {
       const originalText = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<span class="testmatex-icon">⏳</span><span>正在抓取…</span>';
+      btn.innerHTML = '<span class="aitestx-icon">⏳</span><span>正在抓取…</span>';
       try {
         const data = await extractFailureCase();
         data.btnRestore = originalText;
@@ -396,8 +396,8 @@
         if (tabs[0]) await chrome.sidePanel.open({ tabId: tabs[0].id });
         chrome.runtime.sendMessage({ action: 'OPEN_SIDEPANEL_WITH_DATA', data: data });
       } catch (err) {
-        console.error('[TestMateX] 提取失败:', err);
-        btn.innerHTML = '<span class="testmatex-icon">❌</span><span>' + err.message + '</span>';
+        console.error('[AiTestX] 提取失败:', err);
+        btn.innerHTML = '<span class="aitestx-icon">❌</span><span>' + err.message + '</span>';
         btn.disabled = false;
         setTimeout(function () { btn.innerHTML = originalText; }, 4000);
       }
@@ -408,7 +408,7 @@
   const observer = new MutationObserver(function () {
     if (window.location.href !== lastUrl) {
       lastUrl = window.location.href;
-      const oldBtn = document.getElementById('testmatex-trigger-btn');
+      const oldBtn = document.getElementById('aitestx-trigger-btn');
       if (oldBtn) oldBtn.remove();
       setTimeout(injectButton, 500);
     }
@@ -420,7 +420,7 @@
     window.addEventListener('load', injectButton);
   }
   chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    console.log('[TestMateX] 收到消息:', msg.action, msg.opts || '');
+    console.log('[AiTestX] 收到消息:', msg.action, msg.opts || '');
     const handler = (async function () {
       try {
         let data;
@@ -496,5 +496,5 @@
     })();
     return true;
   });
-  console.log('[TestMateX] Content Script V18 loaded');
+  console.log('[AiTestX] Content Script V18 loaded');
 })();

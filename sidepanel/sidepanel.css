@@ -43,11 +43,6 @@ html, body {
   letter-spacing: 0.3px;
 }
 
-.brand-sub {
-  font-size: 11px;
-  opacity: 0.75;
-  margin-left: 2px;
-}
 
 .status-rows {
   display: flex;

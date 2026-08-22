@@ -1,6 +1,6 @@
 /* content/ai-test.css */
 
-.testmatex-floating-btn {
+.aitestx-floating-btn {
   position: fixed !important;
   right: 24px !important;
   bottom: 80px !important;
@@ -21,21 +21,21 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
-.testmatex-floating-btn:hover:not(:disabled) {
+.aitestx-floating-btn:hover:not(:disabled) {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5), 0 4px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-.testmatex-floating-btn:active:not(:disabled) {
+.aitestx-floating-btn:active:not(:disabled) {
   transform: translateY(0) !important;
 }
 
-.testmatex-floating-btn:disabled {
+.aitestx-floating-btn:disabled {
   opacity: 0.7 !important;
   cursor: not-allowed !important;
 }
 
-.testmatex-icon {
+.aitestx-icon {
   font-size: 16px !important;
   line-height: 1 !important;
 }

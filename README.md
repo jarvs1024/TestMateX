@@ -1,4 +1,4 @@
-# TestMateX - 自动化分析提单助手
+# AiTestX - 自动化分析提单助手
 
 > Chrome MV3 浏览器插件。一键从 AiTest 自动化测试 (`http://10.20.65.23:3000`) 抓取失败用例, 渲染到侧边栏表单, 一键提单到 PingCode / PLM 问题单系统。
 
@@ -31,14 +31,14 @@
         └────────────┘                         └─────────┘
 ```
 
-- `js/config.js` 注入 `window.__TESTMATEX_CONFIG.ENV`
+- `js/config.js` 注入 `window.__AITESTX_CONFIG.ENV`
 - content_script / SW 各自判断 `TMX.isMock()`, 路由到 mock 或真实路径
 - mock 数据保持真实抓取逻辑的执行路径, 不破坏业务代码
 
 ## 目录结构
 
 ```
-TestMateX/
+AiTestX/
 ├── manifest.json            # MV3 清单 (name / permissions / content_scripts / side_panel)
 ├── js/
 │   └── config.js            # ENV 全局开关 + TMX 工具
@@ -144,7 +144,7 @@ mock 模式默认; prod 模式需自行填 PLM API 真实地址 (在 `background
 
 ### 自愈 force-inject
 
-`sendMessage` 失败时 (通常因为 content script 未注入或被禁用), SW 自动 `chrome.scripting.executeScript` 强制注入 `config.js` + `ai-test-extractor.js`, 然后重试。控制台会看到 `[TestMateX] content script 未注入, 强制注入并重试`。
+`sendMessage` 失败时 (通常因为 content script 未注入或被禁用), SW 自动 `chrome.scripting.executeScript` 强制注入 `config.js` + `ai-test-extractor.js`, 然后重试。控制台会看到 `[AiTestX] content script 未注入, 强制注入并重试`。
 
 ## 调试
 
@@ -152,7 +152,7 @@ mock 模式默认; prod 模式需自行填 PLM API 真实地址 (在 `background
 
 ```js
 // 任意位置查看状态
-window.__TESTMATEX_CONFIG
+window.__AITESTX_CONFIG
 window.TMX.isMock()
 ```
 
