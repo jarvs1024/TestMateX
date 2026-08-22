@@ -340,19 +340,6 @@
     ps.innerHTML = psOpts;
     if (state.currentProject) ps.value = state.currentProject.projectName;
 
-    const ts = document.getElementById('task-select');
-    if (ts) {
-      let tsOpts = '<option value="">-- 选任务 --</option>';
-      if (state.tasks && state.tasks.length > 0) {
-        state.tasks.forEach(function (t) {
-          const sel = state.currentTask && state.currentTask.taskId === t.taskId ? ' selected' : '';
-          tsOpts += '<option value="' + t.taskId + '"' + sel + '>' +
-            escapeHtml(t.taskName) + ' [' + (t.createDate || '').substring(0, 10) + ']</option>';
-        });
-      }
-      ts.innerHTML = tsOpts;
-      if (state.currentTask) ts.value = state.currentTask.taskId;
-    }
 
     const es = document.getElementById('exec-select');
     if (es) {
